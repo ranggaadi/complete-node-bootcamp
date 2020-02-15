@@ -41,6 +41,13 @@ const http = require('http');
 
 ///////////////////////////////////
 //// SERVER
+
+//top level code
+// menggunakan synchronus karena hanya akan dieksekusi sekali
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
+const dataObject = JSON.parse(data);
+
+
 const server = http.createServer((req, res) => {
     // console.log(req)
     // res.end('Ini pesan dari server ...');
@@ -60,6 +67,9 @@ const server = http.createServer((req, res) => {
         res.end('Selamat Datang di Overview');
     }else if(pathName == '/product'){
         res.end('Selamat Datang di Product');
+    }else if (pathName === '/api'){
+        res.writeHead(200, {"Content-type":"application/json"});
+        res.end(data);
     }else{
         res.writeHead(404, {
             "Content-type":"text/html",
