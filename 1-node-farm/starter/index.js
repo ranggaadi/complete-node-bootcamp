@@ -1,6 +1,6 @@
 const fs = require('fs');
 const http = require('http');
-
+const url = require('url');
 
 ///////////////////////////////////
 //// FILES
@@ -82,21 +82,24 @@ const server = http.createServer((req, res) => {
     //     }
     // }
 
-    const pathName = req.url;
+    const {query, pathname} = url.parse(req.url, true);
 
     //OVERVIEW
-    if(pathName === '/' || pathName === '/overview'){
+    if(pathname === '/' || pathname === '/overview'){
+        res.writeHead(200, {"Content-Type":"text/html"});
         const cardTemp = dataObject.map(el => replaceTemplate(templCard, el)).join('');
         const output = templOverview.replace('{%PRODUCT_CARDS%}', cardTemp);
         
         res.end(output);
-
-    //PRODUCT
-    }else if(pathName == '/product'){
-        res.end('Selamat Datang di Product');
+        
+        //PRODUCT
+    }else if(pathname === '/product'){
+        const product = dataObject[query.id];
+        const output = replaceTemplate(templProduct, product);
+        res.end(output);
     
     //API
-    }else if (pathName === '/api'){
+    }else if (pathname === '/api'){
         res.writeHead(200, {"Content-type":"application/json"});
         res.end(data);
 
