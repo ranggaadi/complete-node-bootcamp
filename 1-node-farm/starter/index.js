@@ -44,6 +44,27 @@ const http = require('http');
 
 //top level code
 // menggunakan synchronus karena hanya akan dieksekusi sekali
+
+//READING TEMPLATE
+
+const replaceTemplate = (template, product) => {
+    let output = template.replace(/{%ID%}/g, product.id)
+    .replace(/{%PRODUCTNAME%}/g, product.productName)
+    .replace(/{%IMAGE%}/g, product.image)
+    .replace(/{%FROM%}/g, product.from)
+    .replace(/{%NUTRIENTS%}/g, product.nutrients)
+    .replace(/{%QUANTITY%}/g, product.quantity)
+    .replace(/{%PRICE%}/g, product.price)
+    .replace(/{%ORGANIC%}/g, `${product.organic ? '' : 'not-organic'}`)
+    .replace(/{%DESCRIPTION%}/g, product.description);
+
+    return output;
+}
+
+const templOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8');
+const templCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8');
+const templProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8');
+
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObject = JSON.parse(data);
 
@@ -63,13 +84,23 @@ const server = http.createServer((req, res) => {
 
     const pathName = req.url;
 
+    //OVERVIEW
     if(pathName === '/' || pathName === '/overview'){
-        res.end('Selamat Datang di Overview');
+        const cardTemp = dataObject.map(el => replaceTemplate(templCard, el)).join('');
+        const output = templOverview.replace('{%PRODUCT_CARDS%}', cardTemp);
+        
+        res.end(output);
+
+    //PRODUCT
     }else if(pathName == '/product'){
         res.end('Selamat Datang di Product');
+    
+    //API
     }else if (pathName === '/api'){
         res.writeHead(200, {"Content-type":"application/json"});
         res.end(data);
+
+    //PAGENOTFOUND
     }else{
         res.writeHead(404, {
             "Content-type":"text/html",
