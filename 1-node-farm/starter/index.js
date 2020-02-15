@@ -34,11 +34,39 @@ const http = require('http');
 // })
 // console.log('akan mencetak file');
 
+
+
+
+
+
 ///////////////////////////////////
 //// SERVER
 const server = http.createServer((req, res) => {
-    // console.log(req);
-    res.end('Ini pesan dari server ...');
+    // console.log(req)
+    // res.end('Ini pesan dari server ...');
+    // console.log(req.url);
+
+    // if(req.url) {
+    //     if(req.url === '/'){
+    //         res.end('Selamat Datang di home')
+    //     }else{
+    //         res.end(`Selamat Datang di ${Array.from(req.url.toString()).filter(chara => chara !== '/').join('')}`)
+    //     }
+    // }
+
+    const pathName = req.url;
+
+    if(pathName === '/' || pathName === '/overview'){
+        res.end('Selamat Datang di Overview');
+    }else if(pathName == '/product'){
+        res.end('Selamat Datang di Product');
+    }else{
+        res.writeHead(404, {
+            "Content-type":"text/html",
+            "header-pribadi":"flag(1t5_4ll_1n_y0ur_h34d)"
+        })
+        res.end('<h2>Page Not Found</h2>');
+    }
 });
 
 server.listen(8000, '127.0.0.1', () => {
