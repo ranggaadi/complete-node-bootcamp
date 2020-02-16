@@ -2,6 +2,9 @@ const fs = require('fs');
 const http = require('http');
 const url = require('url');
 
+// mengexport module DIY
+const replaceTemplate = require('./modules/replaceTemplate');
+
 ///////////////////////////////////
 //// FILES
 
@@ -46,20 +49,6 @@ const url = require('url');
 // menggunakan synchronus karena hanya akan dieksekusi sekali
 
 //READING TEMPLATE
-
-const replaceTemplate = (template, product) => {
-    let output = template.replace(/{%ID%}/g, product.id)
-    .replace(/{%PRODUCTNAME%}/g, product.productName)
-    .replace(/{%IMAGE%}/g, product.image)
-    .replace(/{%FROM%}/g, product.from)
-    .replace(/{%NUTRIENTS%}/g, product.nutrients)
-    .replace(/{%QUANTITY%}/g, product.quantity)
-    .replace(/{%PRICE%}/g, product.price)
-    .replace(/{%ORGANIC%}/g, `${product.organic ? '' : 'not-organic'}`)
-    .replace(/{%DESCRIPTION%}/g, product.description);
-
-    return output;
-}
 
 const templOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8');
 const templCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8');
