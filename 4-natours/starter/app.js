@@ -1,14 +1,21 @@
 const fs = require('fs');
+const morgan = require('morgan');
 const express = require('express');
 const app = express();
 
 const port = 3000;
 
-// GLOBAL MIDDLEWARE
+// #### GLOBAL MIDDLEWARE
+// NB : pada middleware harus selali ada next
+
+//third party middleware
+app.use(morgan('dev'));
+
 app.use(express.json());
+
 app.use((req, res, next) => {
     console.log("Halo dari middleware");
-    next();
+    next(); 
 })
 
 //simple middleware untuk mencatat waktu request
@@ -18,9 +25,12 @@ app.use((req, res, next) => {
 })
 
 
+
 // Ini adalah top level code (dieksekusi sekali aja)
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
+
+// ### ROUTE HANDLER
 //memisahkan route handler
 const getAllTours = (req, res) => {
     res.status(200).json({
@@ -113,6 +123,8 @@ const deleteTour = (req, res) => {
 // app.patch('/api/v1/tours/:id', updateTour)
 // app.delete('/api/v1/tours/:id', deleteTour)
 
+
+// ### ROUTER
 app.route('/api/v1/tours')
     .get(getAllTours)
     .post(createATour);
@@ -122,6 +134,8 @@ app.route('/api/v1/tours/:id')
     .patch(updateTour)
     .delete(deleteTour);
 
+
+// ### SERVER START
 app.listen(port, () => {
     console.log(`App starting on port ${port}`);
 })
