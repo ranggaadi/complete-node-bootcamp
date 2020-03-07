@@ -3,6 +3,22 @@ const fs = require('fs');
 // Ini adalah top level code (dieksekusi sekali aja)
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+// Middleware param untuk mengecek valid tidaknya ID
+exports.checkID = (req, res, next, val) => {
+    console.log(`request id bernilai ${val}`);
+    const id = val * 1; //merubah string params id menjadi number
+    const tour = tours.find(el => el.id === id);
+
+    if (!tour) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Invalid ID"
+        })
+    }
+    next();
+}
+
+
 // ### ROUTE HANDLER
 //memisahkan route handler
 exports.getAllTours = (req, res) => {
@@ -21,20 +37,13 @@ exports.getTour = (req, res) => {
     const id = req.params.id * 1; //merubah string params id menjadi number
     const tour = tours.find(el => el.id === id);
 
-    if (!tour) {
-        res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        })
-    } else {
-        res.status(200).json({
-            status: "success",
-            requestedAt: req.reqTime,   //implementasi middleware pada route handler
-            data: {
-                tour
-            }
-        })
-    }
+    res.status(200).json({
+        status: "success",
+        requestedAt: req.reqTime,   //implementasi middleware pada route handler
+        data: {
+            tour
+        }
+    })
 }
 
 exports.createATour = (req, res) => {
@@ -58,34 +67,22 @@ exports.createATour = (req, res) => {
 
 exports.updateTour = (req, res) => {
     const tour = tours.find(el => el.id === req.params.id * 1);
-    if (!tour) {
-        res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        })
-    } else {
-        res.status(200).json({
-            status: "success",
-            requestedAt: req.reqTime,   //implementasi middleware pada route handler
-            data: {
-                tour: "<Updated Tours here.....>"
-            }
-        })
-    }
+
+    res.status(200).json({
+        status: "success",
+        requestedAt: req.reqTime,   //implementasi middleware pada route handler
+        data: {
+            tour: "<Updated Tours here.....>"
+        }
+    })
 }
 
 exports.deleteTour = (req, res) => {
     const tour = tours.find(el => el.id === req.params.id * 1);
-    if (tour) {
-        res.status(204).json({
-            status: 'success',
-            requestedAt: req.reqTime,   //implementasi middleware pada route handler
-            data: null
-        })
-    } else {
-        res.status(404).json({
-            status: 'fail',
-            message: 'invalid ID'
-        })
-    }
+
+    res.status(204).json({
+        status: 'success',
+        requestedAt: req.reqTime,
+        data: null
+    })
 }
