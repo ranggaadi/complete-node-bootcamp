@@ -13,6 +13,8 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
+app.use(express.static(`${__dirname}/public`)); //menjadikan folder public menjadi root
+
 app.use((req, res, next) => {
     console.log("Halo dari middleware");
     next(); 
