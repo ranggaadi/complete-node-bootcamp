@@ -18,6 +18,16 @@ exports.checkID = (req, res, next, val) => {
     next();
 }
 
+exports.checkBody = (req, res, next) => {
+    console.log(req.body);
+    if(!req.body.price || !req.body.name){
+        return res.status(400).json({
+            status: "fail",
+            message: "Missing name or price property"
+        })
+    }
+    next();
+}
 
 // ### ROUTE HANDLER
 //memisahkan route handler
@@ -54,7 +64,7 @@ exports.createATour = (req, res) => {
     const newTour = Object.assign({ id: newId }, req.body);
 
     tours.push(newTour);
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+    fs.writeFile(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
         res.status(201).json({
             status: "success",
             requestedAt: req.reqTime,   //implementasi middleware pada route handler

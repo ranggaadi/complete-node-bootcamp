@@ -7,7 +7,7 @@ router.param('id', toursController.checkID); //mengecek ID apakah valid pada set
 
 router.route('/')
 .get(toursController.getAllTours)
-.post(toursController.createATour);
+.post(toursController.checkBody, toursController.createATour);
 
 router.route('/:id')
 .get(toursController.getTour)
