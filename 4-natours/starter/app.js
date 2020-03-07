@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 // #### GLOBAL MIDDLEWARE
-// NB : pada middleware harus selali ada next
+// NB : pada middleware harus selalu ada next
 
 //third party middleware
 app.use(morgan('dev'));
@@ -117,23 +117,68 @@ const deleteTour = (req, res) => {
     }
 }
 
+const getAllUsers = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This API not yet implemented'
+    })
+}
+const createUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This API not yet implemented'
+    })
+}
+const getUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This API not yet implemented'
+    })
+}
+const updateUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This API not yet implemented'
+    })
+}
+const deleteUser = (req, res) => {
+    res.status(500).json({
+        status: 'error',
+        message: 'This API not yet implemented'
+    })
+}
+
+// ### ROUTER
 // app.get('/api/v1/tours', getAllTours)
 // app.get('/api/v1/tours/:id', getTour)
 // app.post('/api/v1/tours', createATour)
 // app.patch('/api/v1/tours/:id', updateTour)
 // app.delete('/api/v1/tours/:id', deleteTour)
 
+const tourRouter = express.Router();
+const userRouter = express.Router();
 
-// ### ROUTER
-app.route('/api/v1/tours')
-    .get(getAllTours)
-    .post(createATour);
+tourRouter.route('/')
+.get(getAllTours)
+.post(createATour);
 
-app.route('/api/v1/tours/:id')
-    .get(getTour)
-    .patch(updateTour)
-    .delete(deleteTour);
+tourRouter.route('/:id')
+.get(getTour)
+.patch(updateTour)
+.delete(deleteTour);
 
+userRouter.route('/')
+.get(getAllUsers)
+.post(createUser);
+
+userRouter.route('/:id')
+.get(getUser)
+.patch(updateUser)
+.delete(deleteUser);
+
+
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
 // ### SERVER START
 app.listen(port, () => {
