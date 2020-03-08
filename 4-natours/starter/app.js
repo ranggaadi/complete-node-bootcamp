@@ -9,7 +9,9 @@ const userRouter = require('./routes/userRoutes');
 // NB : pada middleware harus selalu ada next
 
 //third party middleware
-app.use(morgan('dev'));
+if(process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev'));
+}
 
 app.use(express.json());
 
