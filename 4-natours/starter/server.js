@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
-dotenv.config({path:'./config.env'});
+dotenv.config({ path: './config.env' });
 
 mongoose.connect(process.env.DATABASE_LOCAL, {
     useFindAndModify: false,
@@ -10,7 +10,7 @@ mongoose.connect(process.env.DATABASE_LOCAL, {
     useCreateIndex: true,
     useUnifiedTopology: true
 })
-.then(() => console.log("Connection to DB established"));
+    .then(() => console.log("Connection to DB established"));
 
 const app = require('./app');
 // console.log(process.env);
@@ -34,6 +34,15 @@ const tourSchema = new mongoose.Schema({
 
 //dibawah ini adalah model
 const Tour = mongoose.model("Tour", tourSchema);
+
+const testTour = new Tour({
+    name: "Dessert Buddy",
+    price: 666
+})
+
+testTour.save()
+    .then(doc => console.log(doc))
+    .catch(err => console.log("ERROR : ", err));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
