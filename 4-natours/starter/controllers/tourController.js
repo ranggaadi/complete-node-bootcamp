@@ -1,34 +1,4 @@
 const Tour = require('./../models/tourModel');
-const fs = require('fs');
-
-// Ini adalah top level code (dieksekusi sekali aja)
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
-
-// Middleware param untuk mengecek valid tidaknya ID
-exports.checkID = (req, res, next, val) => {
-    console.log(`request id bernilai ${val}`);
-    const id = val * 1; //merubah string params id menjadi number
-    const tour = tours.find(el => el.id === id);
-
-    if (!tour) {
-        return res.status(404).json({
-            status: "fail",
-            message: "Invalid ID"
-        })
-    }
-    next();
-}
-
-exports.checkBody = (req, res, next) => {
-    console.log(req.body);
-    if(!req.body.price || !req.body.name){
-        return res.status(400).json({
-            status: "fail",
-            message: "Missing name or price property"
-        })
-    }
-    next();
-}
 
 // ### ROUTE HANDLER
 //memisahkan route handler
@@ -57,23 +27,27 @@ exports.getTour = (req, res) => {
     })
 }
 
-exports.createATour = (req, res) => {
-    // console.log(req.body);
-    // res.send("Done!");
+exports.createATour = async (req, res) => {
+    try {
+        // const newTour = new Tour({})
+        // newTour.save()
 
-    const newId = tours[tours.length - 1].id + 1;
-    const newTour = Object.assign({ id: newId }, req.body);
-
-    tours.push(newTour);
-    fs.writeFile(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+        const newTour = await Tour.create(req.body);
+        
         res.status(201).json({
             status: "success",
-            requestedAt: req.reqTime,   //implementasi middleware pada route handler
+            requestedAt: req.reqTime,
             data: {
-                tours: newTour
+                tour: newTour
             }
+        });
+    } catch(err) {
+        res.status(400).json({
+            status: "fail",
+            requestedAt: req.reqTime,
+            message: "Invalid input sent!"
         })
-    })
+    }
 }
 
 exports.updateTour = (req, res) => {
