@@ -2,29 +2,45 @@ const Tour = require('./../models/tourModel');
 
 // ### ROUTE HANDLER
 //memisahkan route handler
-exports.getAllTours = (req, res) => {
-    res.status(200).json({
-        status: "success",
-        requestedAt: req.reqTime,   //implementasi middleware pada route handler
-        result: tours.length,
-        data: {
-            tours
-        }
-    })
+exports.getAllTours = async (req, res) => {
+    try {
+        const tours = await Tour.find();
+
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            data: {
+                tours
+            }
+        })
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            requestedAt: req.reqTime,
+            message: err
+        })
+    }
 }
 
-exports.getTour = (req, res) => {
-    // console.log(req.params);
-    const id = req.params.id * 1; //merubah string params id menjadi number
-    const tour = tours.find(el => el.id === id);
+exports.getTour = async (req, res) => {
+    try {
+        const tour = await Tour.findById(req.params.id);
 
-    res.status(200).json({
-        status: "success",
-        requestedAt: req.reqTime,   //implementasi middleware pada route handler
-        data: {
-            tour
-        }
-    })
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            results: tour.length,
+            data: {
+                tour
+            }
+        })
+    }catch (err) {
+        res.status(400).json({
+            status: "fail",
+            requestedAt: req.reqTime,
+            message: "Something went wrong"
+        })
+    }
 }
 
 exports.createATour = async (req, res) => {
