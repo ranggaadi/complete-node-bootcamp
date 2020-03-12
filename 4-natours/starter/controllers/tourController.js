@@ -1,3 +1,4 @@
+const Tour = require('./../models/tourModel');
 const fs = require('fs');
 
 // Ini adalah top level code (dieksekusi sekali aja)
