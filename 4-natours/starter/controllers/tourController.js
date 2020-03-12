@@ -66,16 +66,27 @@ exports.createATour = async (req, res) => {
     }
 }
 
-exports.updateTour = (req, res) => {
-    const tour = tours.find(el => el.id === req.params.id * 1);
+exports.updateTour = async (req, res) => {
+    try{
+        const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+            new: true, //akan mereturn yang telah diupdate
+            runValidators: true //akan melalukan pengecekan lagi sesuai schema
+        });
 
-    res.status(200).json({
-        status: "success",
-        requestedAt: req.reqTime,   //implementasi middleware pada route handler
-        data: {
-            tour: "<Updated Tours here.....>"
-        }
-    })
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            data: {
+                tour
+            }
+        })
+    }catch (err) {
+        res.status(400).json({
+            status: "fail",
+            requestedAt: req.reqTime,
+            message: err
+        })
+    }
 }
 
 exports.deleteTour = (req, res) => {
