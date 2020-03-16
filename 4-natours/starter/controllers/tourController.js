@@ -11,7 +11,16 @@ const Tour = require('./../models/tourModel');
 //memisahkan route handler
 exports.getAllTours = async (req, res) => {
     try {
-        const tours = await Tour.find();
+
+        // console.log(req.query);
+        const queryObj = {...req.query} //mengcopy isi dari req.query
+        const exclude = ['limit', 'sort', 'page', 'fields'];
+        exclude.forEach(el => delete queryObj[el]); //menghapus seua property yang ada di exclude
+
+        const query = Tour.find(queryObj);
+        
+        // const tours = await Tour.find();
+        const tours =  await query; //tidak menggunakan await karena nantinya query akan dichaining sehingga harus dipisah
 
         res.status(200).json({
             status: "success",
