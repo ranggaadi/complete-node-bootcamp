@@ -12,20 +12,31 @@ const Tour = require('./../models/tourModel');
 exports.getAllTours = async (req, res) => {
     try {
 
-        // 1. Simple Filtering
+        // 1a. Simple Filtering
         // console.log(req.query);
         const queryObj = {...req.query} //mengcopy isi dari req.query
         const exclude = ['limit', 'sort', 'page', 'fields'];
         exclude.forEach(el => delete queryObj[el]); //menghapus seua property yang ada di exclude
-        console.log(queryObj);
+        // console.log(queryObj);
 
 
-        // 2. Advanced Filtering
+        // 1b. Advanced Filtering
         let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`);
+        queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`); //mereplace gt/gte dkk menjadi $gt / $gte dkk
         filteredQuery = JSON.parse(queryStr);
 
-        const query = Tour.find(filteredQuery);
+        let query = Tour.find(filteredQuery); //ini akan mereturn query sehingga dapat di 
+        
+        // 2.sorted
+        console.log(req.query);
+        if(req.query.sort){
+            const sortQuery = req.query.sort.split(',').join(' '); //memisahkan dua kondisi sort yang berbeda
+            console.log(sortQuery);
+            query = query.sort(sortQuery); //sort dengan dua kondisi pada mongoose seperti (sort 1 sort2) dipisahkan dengan spasi
+        }else{
+            query = query.sort('-createdAt') //secara default akan mengurutkan dari yang terbaru.
+        }
+
         
         // const tours = await Tour.find();
         const tours =  await query; //tidak menggunakan await karena nantinya query akan dichaining sehingga harus dipisah
