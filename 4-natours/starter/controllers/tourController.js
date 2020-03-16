@@ -1,4 +1,11 @@
 const Tour = require('./../models/tourModel');
+// const fs = require('fs');
+
+// // top level code untuk meng json kan file tours-simple.json
+// const data = fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf-8');
+// const dataJson = JSON.parse(data);
+// dataJson.forEach(el => delete el.id); //untuk menghapus property id pada json
+
 
 // ### ROUTE HANDLER
 //memisahkan route handler
@@ -108,3 +115,39 @@ exports.deleteTour = async (req, res) => {
         })
     }
 }
+
+// exports.deleteAllTour = async (req, res, next) => { //digunakan untuk menghapus semua data
+//     try {
+//         await Tour.deleteMany({});
+
+//         res.status(204).json({
+//             status: "success",
+//             requestedAt: req.reqTime,
+//             data: null
+//         });
+//     }catch(err) {
+//         res.status(404).json({
+//             status: "fail",
+//             requestedAt: req.reqTime,
+//             message: err
+//         })
+//     }
+//     next();
+// }
+
+// exports.importAllTour = async (req, res) => {  //digunakan untuk menginsert semua data dari tours-simple.json.
+//     try {
+//         const allTour = Tour.insertMany(dataJson);
+
+//         res.status(200).json({
+//             status: 'success',
+//             requestedAt: req.reqTime,
+//             data: allTour
+//         })
+//     }catch (err) {
+//         res.status(404).json({
+//             status: "fail",
+//             message: err
+//         })
+//     }
+// }
