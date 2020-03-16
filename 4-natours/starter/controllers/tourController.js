@@ -19,9 +19,6 @@ exports.getAllTours = async (req, res) => {
         exclude.forEach(el => delete queryObj[el]); //menghapus seua property yang ada di exclude
         // console.log(queryObj);
 
-
-
-
         // 1b. Advanced Filtering
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`); //mereplace gt/gte dkk menjadi $gt / $gte dkk
@@ -60,6 +57,18 @@ exports.getAllTours = async (req, res) => {
         }
 
 
+        //4.Pagination skip() dan limit
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 10;
+        const skip = (page-1)*limit;
+
+        query = query.skip(skip).limit(limit);
+
+        if(req.query.page){
+            const numOfData = await Tour.estimatedDocumentCount(); //menghitung banyaknya document
+            if(skip >= numOfData) throw new Error("This page doesn't exist");
+            //apabila nantinya page melebihi banyaknya data maka nanti akan di throw sebuah error.
+        }
 
         
         // const tours = await Tour.find();
@@ -77,7 +86,7 @@ exports.getAllTours = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err
+            message: err.message
         })
     }
 }
@@ -98,7 +107,7 @@ exports.getTour = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err
+            message: err.message
         })
     }
 }
@@ -121,7 +130,7 @@ exports.createATour = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err
+            message: err.message
         })
     }
 }
@@ -144,7 +153,7 @@ exports.updateTour = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err
+            message: err.message
         })
     }
 }
@@ -163,7 +172,7 @@ exports.deleteTour = async (req, res) => {
         res.status(404).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err
+            message: err.message
         })
     }
 }
