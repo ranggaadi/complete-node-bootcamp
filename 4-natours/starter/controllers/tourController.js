@@ -20,22 +20,46 @@ exports.getAllTours = async (req, res) => {
         // console.log(queryObj);
 
 
+
+
         // 1b. Advanced Filtering
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`); //mereplace gt/gte dkk menjadi $gt / $gte dkk
         filteredQuery = JSON.parse(queryStr);
 
-        let query = Tour.find(filteredQuery); //ini akan mereturn query sehingga dapat di 
+
+
+
+        let query = Tour.find(filteredQuery); //ini akan mereturn query sehingga dapat di chain
+
+
+
         
-        // 2.sorted
-        console.log(req.query);
+        // 2.SORT FUNCTION
         if(req.query.sort){
             const sortQuery = req.query.sort.split(',').join(' '); //memisahkan dua kondisi sort yang berbeda
-            console.log(sortQuery);
+            // console.log(sortQuery);
             query = query.sort(sortQuery); //sort dengan dua kondisi pada mongoose seperti (sort 1 sort2) dipisahkan dengan spasi
         }else{
             query = query.sort('-createdAt') //secara default akan mengurutkan dari yang terbaru.
+            //apabila fungsi sort terdapat minus berarti secara descending
         }
+
+
+
+
+        //3 Field Limiting / SELECT / Projection
+        // console.log(req.query);
+
+        if(req.query.fields){
+            const project = req.query.fields.split(',').join(' ');
+            // console.log(project);
+            query = query.select(project);
+        }else{
+            query = query.select('-__v'); //tanda minus pada select() berarti tidak akan ditampilkan
+        }
+
+
 
         
         // const tours = await Tour.find();

@@ -49,7 +49,9 @@ const tourSchema = new mongoose.Schema({
     images: [String], //tipenya merupakan array of string.
     createdAt: {
         type: Date,
-        default: Date.now()
+        default: Date.now(),
+        select: false //apabila select bernilai false maka tidak akan ditampilkan pada client
+        //bermanfaat apabila data yang ada bersifat sensitif
     },
     startDates: [Date]
 })
