@@ -39,7 +39,7 @@ exports.getTour = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: "Something went wrong"
+            message: err
         })
     }
 }
@@ -62,7 +62,7 @@ exports.createATour = async (req, res) => {
         res.status(400).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: "Invalid input sent!"
+            message: err
         })
     }
 }
