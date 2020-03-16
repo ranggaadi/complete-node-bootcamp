@@ -12,12 +12,20 @@ const Tour = require('./../models/tourModel');
 exports.getAllTours = async (req, res) => {
     try {
 
+        // 1. Simple Filtering
         // console.log(req.query);
         const queryObj = {...req.query} //mengcopy isi dari req.query
         const exclude = ['limit', 'sort', 'page', 'fields'];
         exclude.forEach(el => delete queryObj[el]); //menghapus seua property yang ada di exclude
+        console.log(queryObj);
 
-        const query = Tour.find(queryObj);
+
+        // 2. Advanced Filtering
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`);
+        filteredQuery = JSON.parse(queryStr);
+
+        const query = Tour.find(filteredQuery);
         
         // const tours = await Tour.find();
         const tours =  await query; //tidak menggunakan await karena nantinya query akan dichaining sehingga harus dipisah
