@@ -202,15 +202,15 @@ exports.getMonthlyPlan = async (req, res) => {
                 }
             },
             {
-                $sort: {countOfTour: -1}
+                $sort: {countOfTour: -1} //urutakn countOfTour secara descending
             },
             {
-                $addFields: {month: "$_id"} 
+                $addFields: {month: "$_id"} //menambah field baru dengan nama month dengan nilai sama dengan _id
             },
             {
-                $project: {_id: 0}
+                $project: {_id: 0} //menghilangkan kolom id 0 = hilang,1= tampil
             },{
-                $limit: 1
+                $limit: 1 //limit tampilan
             }
             // {
             //     $group: {

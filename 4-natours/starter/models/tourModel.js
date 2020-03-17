@@ -54,6 +54,17 @@ const tourSchema = new mongoose.Schema({
         //bermanfaat apabila data yang ada bersifat sensitif
     },
     startDates: [Date]
+
+}, {                             //BLOK ini adalah Opsi schema
+    toJSON: {virtuals: true},   //ini berarti apabila schema dijadikan JSON atau Object maka akan menyertakan document virtual
+    toObject: {virtuals: true}
+})
+
+
+//akan membuat document virtual bernama durationInHours
+// kenapa tidak memakai arrow function? karena dalam arrow function tidak mendapat thisnya sendiri
+tourSchema.virtual("durationInHours").get(function(){
+    return this.duration*24;
 })
 
 //dibawah ini adalah model
