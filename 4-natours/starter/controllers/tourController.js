@@ -9,6 +9,15 @@ const Tour = require('./../models/tourModel');
 
 // ### ROUTE HANDLER
 //memisahkan route handler
+exports.alias = (req, res, next) => {
+    //akan mengeset query request sebelum di querykan ke fungsi getAllTours
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,duration,difficulty,price,ratingsAverage,summary';
+    next();
+}
+
+
 exports.getAllTours = async (req, res) => {
     try {
 
@@ -33,6 +42,7 @@ exports.getAllTours = async (req, res) => {
 
         
         // 2.SORT FUNCTION
+        console.log(req.query);
         if(req.query.sort){
             const sortQuery = req.query.sort.split(',').join(' '); //memisahkan dua kondisi sort yang berbeda
             // console.log(sortQuery);
@@ -172,6 +182,20 @@ exports.deleteTour = async (req, res) => {
         res.status(404).json({
             status: "fail",
             requestedAt: req.reqTime,
+            message: err.message
+        })
+    }
+}
+
+exports.checkTop5Tour =  (req, res, next) => {
+    try{
+        if(req.url == '/top-5-tours'){
+            req.query = {limit: 5, sort: '-ratingsAverage,price'};
+        }
+        next();
+    }catch(err){
+        res.status(404).json({
+            status: "fail",
             message: err.message
         })
     }
