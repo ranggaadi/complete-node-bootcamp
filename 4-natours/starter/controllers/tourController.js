@@ -134,12 +134,43 @@ exports.deleteTour = async (req, res) => {
     }
 }
 
-exports.checkTop5Tour = (req, res, next) => {
+
+exports.getTourStats = async (req, res) => {
     try {
-        if (req.url == '/top-5-tours') {
-            req.query = { limit: 5, sort: '-ratingsAverage,price' };
-        }
-        next();
+        const stats = await Tour.aggregate([
+            {
+                //OUTER QUERY (pada SUBQUERY)
+                $match: { ratingsAverage: { $gte: 4.5 } }   //akan memilih data dimana ratingsQuantity >= 50
+            },
+            {
+                $group: {
+                    //nama tabel harus didahului oleh $
+                    // _id: "$difficulty", //tampilan akan di grup berdasarkan value dari tabel ini
+                    _id: {$toUpper: "$difficulty"}, //tampilan akan di grup berdasarkan value dari tabel ini
+                    numData: {$sum: 1}, //akan menghitung data pada setiap data
+                    numRating: {$sum: "$ratingsQuantity"},
+                    avgRating: {$avg: "$ratingsAverage"}, 
+                    avgPrice: {$avg: "$price"},
+                    minPrice: {$min: "$price"},
+                    maxPrice: {$max: "$price"}
+                }
+            },
+            {
+                $sort: {maxPrice: -1, avgRating: -1}
+            },
+            // {
+            //     //ini adalah Inner query ( pada Subquery)
+            //     $match: {avgPrice: {$gte: 1500}, _id: {$ne: "DIFFICULT"}} //ne adalah not equal, dan table yang digunakan adalah
+            //     //tabel pada agregasi groupby
+            // }
+        ])
+
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            results: stats.length,
+            data: stats
+        })
     } catch (err) {
         res.status(404).json({
             status: "fail",
@@ -147,6 +178,20 @@ exports.checkTop5Tour = (req, res, next) => {
         })
     }
 }
+
+// exports.checkTop5Tour = (req, res, next) => {
+//     try {
+//         if (req.url == '/top-5-tours') {
+//             req.query = { limit: 5, sort: '-ratingsAverage,price' };
+//         }
+//         next();
+//     } catch (err) {
+//         res.status(404).json({
+//             status: "fail",
+//             message: err.message
+//         })
+//     }
+// }
 
 // exports.deleteAllTour = async (req, res, next) => { //digunakan untuk menghapus semua data
 //     try {
