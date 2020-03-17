@@ -146,17 +146,17 @@ exports.getTourStats = async (req, res) => {
                 $group: {
                     //nama tabel harus didahului oleh $
                     // _id: "$difficulty", //tampilan akan di grup berdasarkan value dari tabel ini
-                    _id: {$toUpper: "$difficulty"}, //tampilan akan di grup berdasarkan value dari tabel ini
-                    numData: {$sum: 1}, //akan menghitung data pada setiap data
-                    numRating: {$sum: "$ratingsQuantity"},
-                    avgRating: {$avg: "$ratingsAverage"}, 
-                    avgPrice: {$avg: "$price"},
-                    minPrice: {$min: "$price"},
-                    maxPrice: {$max: "$price"}
+                    _id: { $toUpper: "$difficulty" }, //tampilan akan di grup berdasarkan value dari tabel ini
+                    numData: { $sum: 1 }, //akan menghitung data pada setiap data
+                    numRating: { $sum: "$ratingsQuantity" },
+                    avgRating: { $avg: "$ratingsAverage" },
+                    avgPrice: { $avg: "$price" },
+                    minPrice: { $min: "$price" },
+                    maxPrice: { $max: "$price" }
                 }
             },
             {
-                $sort: {maxPrice: -1, avgRating: -1}
+                $sort: { maxPrice: -1, avgRating: -1 }
             },
             // {
             //     //ini adalah Inner query ( pada Subquery)
@@ -170,6 +170,61 @@ exports.getTourStats = async (req, res) => {
             requestedAt: req.reqTime,
             results: stats.length,
             data: stats
+        })
+    } catch (err) {
+        res.status(404).json({
+            status: "fail",
+            message: err.message
+        })
+    }
+}
+
+exports.getMonthlyPlan = async (req, res) => {
+    try {
+        const year = req.params.year * 1;
+
+        const plan = await Tour.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates: { 
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)}
+                }
+            },
+            {
+                $group: {
+                    _id: {$month: '$startDates'},
+                    countOfTour: {$sum: 1},
+                    tour: {$push: '$name'}
+                }
+            },
+            {
+                $sort: {countOfTour: -1}
+            },
+            {
+                $addFields: {month: "$_id"} 
+            },
+            {
+                $project: {_id: 0}
+            },{
+                $limit: 1
+            }
+            // {
+            //     $group: {
+            //         _id: null,
+            //         busiestMonth: {$max: "$countOfTour"}
+            //     }
+            // }
+        ])
+
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            size: plan.length,
+            plan
         })
     } catch (err) {
         res.status(404).json({
