@@ -85,6 +85,7 @@ tourSchema.pre("save", function(next){
 
 
 // QUERY middleware : akan menjalankan fungsi sebelum query dimulai (pre) dan sesudah query dijalankan (post)
+
 // /^find/ adalah regex yang akan memilih semua yang berawalan dengan find (find, findOne, findOneAndUpdate dkk)
 tourSchema.pre(/^find/, function(next){
     this.find({isSecretTour: {$ne: true}});  //$ne = not equal
@@ -98,6 +99,22 @@ tourSchema.post(/^find/, function(docs, next){
     console.log("Object returned:", docs.length);
     next();
 })
+
+
+
+//AGGREGATION MIDDLEWARE
+tourSchema.pre("aggregate", function(next){
+    console.log(this.pipeline()) //isi dari aggregate sesuai route yang kita jalankan.
+    this.pipeline().unshift({$match: {isSecretTour: {$ne: true}}}); //memasukan match baru diawal aggregasi
+    next();
+});
+
+tourSchema.post("aggregate", function(data, next){
+    // console.log(data); //isi data dari aggregate yang telah dijalanakan
+    console.log(this.pipeline());
+    next();
+})
+
 
 // tourSchema.pre("save", function(next){
 //     console.log("ini akan dicetak antara proses pemberian slug dan middleware post");
