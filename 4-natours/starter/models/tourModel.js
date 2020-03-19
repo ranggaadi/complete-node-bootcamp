@@ -7,7 +7,9 @@ const tourSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A tour must have a name'],
         unique: true,
-        trim: true
+        trim: true,
+        maxlength: [50, "A tour name must contain not more than or equals to 50 characters"],
+        minlength: [10, "A tour name must contain not less than or equals to 10 characters"]
     },
     slug: String, //untuk implementasi mongoose middleware document
     duration: {
@@ -20,11 +22,17 @@ const tourSchema = new mongoose.Schema({
     },
     difficulty: {
         type: String,
-        required: [true, 'A tour must have a difficulty'] 
+        required: [true, 'A tour must have a difficulty'],
+        enum: {
+            values: ['easy', 'medium', 'difficult'],
+            message: "Difficulty is either: easy, medium or difficult"
+        }
     },
     ratingsAverage: {   //akan menghitung dari model reviews
         type: Number,
-        default: 4.5
+        default: 4.5,
+        min: [1, "Rating must be above 1.0"],
+        max: [5, "Rating must be below 5.0"],
     },
     ratingsQuantity: {
         type: Number,
