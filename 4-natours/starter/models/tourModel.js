@@ -9,7 +9,7 @@ const tourSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    slug: String,
+    slug: String, //untuk implementasi mongoose middleware document
     duration: {
         type: Number,
         required: [true, 'A tour must have a duration']
@@ -44,6 +44,10 @@ const tourSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    isSecretTour: {
+        type: Boolean,
+        default: false
+    },
     imageCover: {
         type: String,
         required: [true, "A tour must have an cover image"]
@@ -56,7 +60,6 @@ const tourSchema = new mongoose.Schema({
         //bermanfaat apabila data yang ada bersifat sensitif
     },
     startDates: [Date]
-
 }, {                             //BLOK ini adalah Opsi schema
     toJSON: {virtuals: true},   //ini berarti apabila schema dijadikan JSON atau Object maka akan menyertakan document virtual
     toObject: {virtuals: true}
@@ -70,7 +73,7 @@ tourSchema.virtual("durationInHours").get(function(){
 })
 
 
-// MongoDB middleware: mongodb juga memiliki fungsi middleware yang terdiri dari document, query, aggregate, dan model middleware
+// Mongoose middleware: mongoose juga memiliki fungsi middleware yang terdiri dari document, query, aggregate, dan model middleware
 
 // DOCUMENT middleware : akan menjalankan fungsi sebelum fungsi .save() atau .create() (tidak berlaku untuk insertMany dkk.)
 tourSchema.pre("save", function(next){
@@ -80,6 +83,21 @@ tourSchema.pre("save", function(next){
     next();
 });
 
+
+// QUERY middleware : akan menjalankan fungsi sebelum query dimulai (pre) dan sesudah query dijalankan (post)
+// /^find/ adalah regex yang akan memilih semua yang berawalan dengan find (find, findOne, findOneAndUpdate dkk)
+tourSchema.pre(/^find/, function(next){
+    this.find({isSecretTour: {$ne: true}});  //$ne = not equal
+
+    this.start = Date.now(); //karena this adalah object query biasa sehingga bisa digunakan untuk menambahkan apapun
+    next();
+})
+
+tourSchema.post(/^find/, function(docs, next){
+    console.log(`Query dijalankan dalam waktu ${Date.now()-this.start} ms!`); //untuk mencetak waktu eksekusi sejak fungsi pre berjalan
+    console.log("Object returned:", docs.length);
+    next();
+})
 
 // tourSchema.pre("save", function(next){
 //     console.log("ini akan dicetak antara proses pemberian slug dan middleware post");
