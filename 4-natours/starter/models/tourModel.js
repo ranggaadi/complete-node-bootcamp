@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 //dibawah ini adalah schema
 const tourSchema = new mongoose.Schema({
@@ -8,6 +9,7 @@ const tourSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    slug: String,
     duration: {
         type: Number,
         required: [true, 'A tour must have a duration']
@@ -66,6 +68,32 @@ const tourSchema = new mongoose.Schema({
 tourSchema.virtual("durationInHours").get(function(){
     return this.duration*24;
 })
+
+
+// MongoDB middleware: mongodb juga memiliki fungsi middleware yang terdiri dari document, query, aggregate, dan model middleware
+
+// DOCUMENT middleware : akan menjalankan fungsi sebelum fungsi .save() atau .create() (tidak berlaku untuk insertMany dkk.)
+tourSchema.pre("save", function(next){
+    // console.log(this) //this adalah document schema saat ini
+
+    this.slug = slugify(this.name, {lower: true});
+    next();
+});
+
+
+// tourSchema.pre("save", function(next){
+//     console.log("ini akan dicetak antara proses pemberian slug dan middleware post");
+//     next();
+// })
+
+// //middleware document post dijalankan setelah data disave
+// tourSchema.post("save", function(doc, next){
+//     console.log(doc) //doc adalah argument dari document yang sudah dirubah
+//     next();
+// })
+
+
+
 
 //dibawah ini adalah model
 const Tour = mongoose.model("Tour", tourSchema);
