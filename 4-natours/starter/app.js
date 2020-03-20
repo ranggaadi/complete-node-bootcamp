@@ -50,7 +50,7 @@ app.all('*', (req, res, next) => {
 })
 
 
-// dibawah ini adalah middleware global error handling 
+// dibawah ini adalah middleware global error handling dimana semua error akan diproses disini
 app.use(globalErrorHandler);
 
 module.exports = app;
