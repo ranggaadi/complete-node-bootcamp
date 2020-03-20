@@ -34,13 +34,27 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter); 
 
+
+
 //middleware dibawah ini digunakan untuk menghandle url yang tidak valid
 app.all('*', (req, res, next) => {
-    res.status(404).json({
-        status: "fail",
-        requestedAt: req.reqTime,
-        message: `Couldn't find ${req.originalUrl} on this server!`
-    })
+    const err = new Error(`Couldn't find ${req.originalUrl} on this server!`);
+    err.statusCode = 404;
+    err.status = "fail"
+    next(err); //apabila next fungsi next diisikan dengan argument apapun berarti akan dikirim ke middleware error
+})
+
+
+// dibawah ini adalah middleware global error handling 
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || "error";
+
+    res.status(err.statusCode).json({
+        status: err.status,
+        requestedAt: req.requestedAt,
+        message: err.message
+    });
 })
 
 module.exports = app;
