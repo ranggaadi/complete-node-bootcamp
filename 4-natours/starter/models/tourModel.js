@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 //dibawah ini adalah schema
 const tourSchema = new mongoose.Schema({
@@ -9,7 +10,10 @@ const tourSchema = new mongoose.Schema({
         unique: true,
         trim: true,
         maxlength: [50, "A tour name must contain not more than or equals to 50 characters"],
-        minlength: [10, "A tour name must contain not less than or equals to 10 characters"]
+        minlength: [10, "A tour name must contain not less than or equals to 10 characters"],
+
+        //dibawah ini adalah validator untuk memvalidasi menggunakan external validator dari npm
+        // validate: [validator.isAlpha, "A tour name should only contains characters"]  
     },
     slug: String, //untuk implementasi mongoose middleware document
     duration: {
@@ -42,7 +46,21 @@ const tourSchema = new mongoose.Schema({
         type: Number,
         required: [true, "A tour must have a price"]
     },
-    discountPrice: Number,
+    discountPrice: {
+        type: Number,
+        // validate: function(val){ //mendapatkan akses val -> dimana val adalah nilai yang diassign saat pembuatan
+        //     return val <= this.price //nilai diskon tidak boleh melebihi harga aslinya.
+        // }
+
+        //dibawah ini adalah custom validator
+        validate: {
+            validator: function(val){
+                //variabel this ini hanya merujuk ke object pembuatan dokumen baru (bukan update dkk)
+                return val <= this.price;
+            },
+            message: "discountPrice can't have value above price value"
+        }
+    },
     summary: {
         type: String,
         trim: true,
