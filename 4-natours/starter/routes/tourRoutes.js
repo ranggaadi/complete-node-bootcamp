@@ -15,11 +15,15 @@ router.route('/')
 .get(toursController.getAllTours)
 .post(toursController.createATour)
 
+// router.route('/:check').all(async (req, res) => {
+
+// });
 
 router.route('/:id')
 .get(toursController.getTour)
 .patch(toursController.updateTour)
 .delete(toursController.deleteTour);
+
 
 // router.route('/4fun')
 // .post(toursController.deleteAllTour, toursController.importAllTour);

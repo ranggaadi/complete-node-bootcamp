@@ -34,4 +34,13 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter); 
 
+//middleware dibawah ini digunakan untuk menghandle url yang tidak valid
+app.all('*', (req, res, next) => {
+    res.status(404).json({
+        status: "fail",
+        requestedAt: req.reqTime,
+        message: `Couldn't find ${req.originalUrl} on this server!`
+    })
+})
+
 module.exports = app;

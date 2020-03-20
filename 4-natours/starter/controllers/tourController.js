@@ -61,10 +61,10 @@ exports.getTour = async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(400).json({
+        res.status(404).json({
             status: "fail",
             requestedAt: req.reqTime,
-            message: err.message
+            message: `Couldn't find tours with id: ${req.params.id}`
         })
     }
 }
