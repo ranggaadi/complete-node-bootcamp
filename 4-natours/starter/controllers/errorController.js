@@ -1,3 +1,11 @@
+const CustomError = require('./../utils/customError');
+
+const handleErrorDB = err => {
+    const message = `Invalid ${err.path}: ${err.value}`;
+    return new CustomError(message, 400);
+}
+
+
 const errProd = (err, res) => {
     //Operasional error: mengirim pesan error ke client
     if(err.isOperational){
@@ -37,6 +45,9 @@ module.exports = (err, req, res, next) => {
     if (process.env.NODE_ENV === "development") {
         errDev(err, res);
     } else if (process.env.NODE_ENV === "production") {
-        errProd(err, res)
+        let error = {...err}; //meng hardcopy error file
+
+        if(error.name === "CastError") error = handleErrorDB(error); //jika tipenya CastError maka dihandle fungsi handler err DB
+        errProd(error, res);
     }
 }

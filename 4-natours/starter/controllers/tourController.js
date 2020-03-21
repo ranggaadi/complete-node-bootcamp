@@ -43,16 +43,16 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 })
 
 exports.getTour = catchAsync(async (req, res, next) => {
-    
+
     // const tour = await Tour.findById(req.params.id, (err) => {
     //     if(err){
     //         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404)); //untuk diurus pada custom error
     //     }
     // });
 
-    const tour = await Tour.find({_id: req.params.id});
+    const tour = await Tour.find({ _id: req.params.id });
 
-    if(!tour.length){
+    if (!tour.length) {
         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
     }
 
@@ -60,7 +60,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
         status: "success",
         data: {
             tour
-        } 
+        }
     })
 })
 
@@ -81,31 +81,40 @@ exports.createATour = catchAsync(async (req, res, next) => {
 });
 
 exports.updateTour = catchAsync(async (req, res, next) => {
-
+    let flag = true;
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
         new: true, //akan mereturn yang telah diupdate
         runValidators: true //akan melalukan pengecekan lagi sesuai schema
-    }, ()=>{});
-
-    if(!tour.length){
-        return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
-    }
-
-    res.status(200).json({
-        status: "success",
-        requestedAt: req.reqTime,
-        data: {
-            tour
+    }, (err) => {
+        if(err){
+            if(err.name == "ValidationError"){
+                flag = false;
+                return next(err)
+            }
         }
-    })
+    });
+
+    if(flag){
+        if (!tour.length) {
+            return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+        }
+
+        res.status(200).json({
+            status: "success",
+            requestedAt: req.reqTime,
+            data: {
+                tour
+            }
+        })
+    }
 })
 
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
 
-    const tour = await Tour.findByIdAndDelete(req.params.id, ()=>{});
-    
-    if(!tour.length){
+    const tour = await Tour.findByIdAndDelete(req.params.id, () => { });
+
+    if (!tour.length) {
         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
     }
 
