@@ -5,6 +5,11 @@ const handleErrorDB = err => {
     return new CustomError(message, 400);
 }
 
+const handleDuplicateFieldsDB = err => {
+    const duplicated = Object.values(err.keyValue);
+    return new CustomError(`Duplicated field value: ${duplicated.join(', ')}`, 400)
+}
+
 
 const errProd = (err, res) => {
     //Operasional error: mengirim pesan error ke client
@@ -48,6 +53,8 @@ module.exports = (err, req, res, next) => {
         let error = {...err}; //meng hardcopy error file
 
         if(error.name === "CastError") error = handleErrorDB(error); //jika tipenya CastError maka dihandle fungsi handler err DB
+        if(error.code === 11000) error = handleDuplicateFieldsDB(error);
+
         errProd(error, res);
     }
 }
