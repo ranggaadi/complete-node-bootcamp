@@ -1,6 +1,7 @@
 const Tour = require('./../models/tourModel');
 const APIfeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
+const CustomError = require('./../utils/customError');
 // const fs = require('fs');
 
 // // top level code untuk meng json kan file tours-simple.json
@@ -42,16 +43,22 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 })
 
 exports.getTour = catchAsync(async (req, res, next) => {
+    
+    const tour = await Tour.findById(req.params.id, (err) => {
+        if(err){
+            return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404)); //untuk diurus pada custom error
+        }
+    });
 
-    const tour = await Tour.findById(req.params.id);
+    // if(!tour.length){
+    //     return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+    // }
 
     res.status(200).json({
         status: "success",
-        requestedAt: req.reqTime,
-        results: tour.length,
         data: {
             tour
-        }
+        } 
     })
 })
 
@@ -76,7 +83,15 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
         new: true, //akan mereturn yang telah diupdate
         runValidators: true //akan melalukan pengecekan lagi sesuai schema
+    }, (err) => {
+        if(err){
+            return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+        }
     });
+
+    // if(!tour){
+    //     return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+    // }
 
     res.status(200).json({
         status: "success",
@@ -90,7 +105,15 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
 
-    await Tour.findByIdAndDelete(req.params.id);
+    const tour = await Tour.findByIdAndDelete(req.params.id, (err)=> {
+        if(err){
+            return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404)); //untuk diurus pada custom error
+        }
+    });
+
+    // if(!tour){
+    //     return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+    // }
 
     res.status(204).json({
         status: "success",
