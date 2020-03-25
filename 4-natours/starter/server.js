@@ -7,7 +7,7 @@ const dotenv = require('dotenv');
 //contoh: console.log(test);
 process.on('uncaughtException', err => {
     console.log("UNCAUGHT EXCEPTION. Shutting Down ...");
-    console.log(err.name, err.message);
+    console.log(err.name, err.message, err.stack);
     process.exit(1);
 })
 
@@ -38,7 +38,7 @@ const server = app.listen(port, () => {
 //apabila masih baik baik saja coba lakukan request.
 
 process.on('unhandledRejection', (err) => { //process mendengarkan event unhandledRejection
-    console.log(err.name, err.message);
+    console.log(err.name, err.message, err.stack);
     console.log("UNHANDLED REJECTION. Shutting down . . ."); //yang hanya bisa dilakukan programmer adalah menutup server
     
     //kenapa tidak langsung menggunakan process.exit() karena agar memproses request yang ada dulu, sehingga tidak langsung

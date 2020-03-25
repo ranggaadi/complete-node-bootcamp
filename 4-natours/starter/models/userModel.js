@@ -20,18 +20,19 @@ const userSchema = new mongoose.Schema({
     photo: String,
     password:  {
         type: String,
-        validate: {
-            validator: function(val) {
-                return val.includes(/^(?=.*[A-Za-z])(?=.{8,})/);
-            },
-            message: "A password should contains at l uppercase or 1 lowecase alhabetical character"
-        },
-        minlength: 8,
-
+        required: [true, "Please provide a password"],
+        minlength: [8, "A password must at least has length of 8"],
+        match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.{8,})"), "A password must contain at least 1 uppercase and or 1 lowercase"] //minimal 8 char, dan harus mengandung setidaknya 1 upper dan lower
     },
     confirmPassword: {
         type: String,
-        required: [true, "Please confirm your password"]
+        required: [true, "Please confirm your password"],
+        validate: {
+            validator: function(val) {
+                return val === this.password
+            },
+            message: "the confirmed password must be the same with the password"
+        }
     }
 })
 
