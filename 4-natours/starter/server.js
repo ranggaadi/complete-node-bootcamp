@@ -2,6 +2,17 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
+//untuk mencoba kasus exception dibawah ini bisa dengan mengconsole.log variabel yang tidak pernah dibuat setelah handler di
+//definisikan lalu jalankan aplikasi 
+//contoh: console.log(test);
+process.on('uncaughtException', err => {
+    console.log("UNCAUGHT EXCEPTION. Shutting Down ...");
+    console.log(err.name, err.message);
+    process.exit(1);
+})
+
+// console.log(test); //untuk testing uncaught exception
+
 dotenv.config({ path: './config.env' });
 
 mongoose.connect(process.env.DATABASE_LOCAL, {
