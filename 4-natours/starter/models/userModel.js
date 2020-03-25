@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -27,6 +28,7 @@ const userSchema = new mongoose.Schema({
     confirmPassword: {
         type: String,
         required: [true, "Please confirm your password"],
+        //ingat : validate hanya berfungsi ketika fungsi .create() atau .save()
         validate: {
             validator: function(val) {
                 return val === this.password
@@ -34,6 +36,20 @@ const userSchema = new mongoose.Schema({
             message: "the confirmed password must be the same with the password"
         }
     }
+})
+
+//middleware berjalan sebelum data disave ke database (digunakan untuk hasing password)
+userSchema.pre('save', async function(next){
+    //jika bagian dari password tidak dimodifikasi, maka fungsi tidak akan dijalankan
+    if(!this.isModified('password')) return next();
+    
+    //mengsalt dan menggenerate password yang sudah di hashing dan disimpan kembali ke password
+    //angka 12 adalah cost, dimana semakin besar semakin baik, namun juga meningkatkan intensivitas CPU
+    this.password = await bcrypt.hash(this.password, 12);
+    
+    //digunakan untuk mengilangkan field sebelum disimpan ke database.
+    this.confirmPassword = undefined;
+    next();
 })
 
 const User = mongoose.model('User', userSchema);
