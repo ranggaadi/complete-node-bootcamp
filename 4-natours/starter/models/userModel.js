@@ -23,7 +23,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please provide a password"],
         minlength: [8, "A password must at least has length of 8"],
-        match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.{8,})"), "A password must contain at least 1 uppercase and or 1 lowercase"] //minimal 8 char, dan harus mengandung setidaknya 1 upper dan lower
+
+        //minimal 8 char, dan harus mengandung setidaknya 1 upper dan lower
+        match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.{8,})"), "A password must contain at least 1 uppercase and or 1 lowercase"],
+        select: false //agar tidak terlihat saat di select
     },
     confirmPassword: {
         type: String,
@@ -51,6 +54,13 @@ userSchema.pre('save', async function(next){
     this.confirmPassword = undefined;
     next();
 })
+
+//instanced schema, sehingga fungsi yang dibuat bisa dipanggil dari hasil instansiasi userSchema
+//candidatePassword = password yang akan dicek
+//userPassword = password yang di hash
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword){
+    return await bcrypt.compare(candidatePassword, userPassword) //mereturn boolean password benar apa salah
+}
 
 const User = mongoose.model('User', userSchema);
 
