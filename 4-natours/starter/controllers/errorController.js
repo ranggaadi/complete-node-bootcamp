@@ -10,6 +10,12 @@ const handleDuplicateFieldsDB = err => {
     return new CustomError(`Duplicated field value: ${duplicated.join(', ')}`, 400)
 }
 
+const handleValidationErrorDB = err => {
+    const errorsMessage = Object.values(err.errors).map(el => el.message);
+
+    const message= `Invalid input data: ${errorsMessage.join(". ")}`;
+    return new CustomError(message, 400);
+}
 
 const errProd = (err, res) => {
     //Operasional error: mengirim pesan error ke client
@@ -50,10 +56,12 @@ module.exports = (err, req, res, next) => {
     if (process.env.NODE_ENV === "development") {
         errDev(err, res);
     } else if (process.env.NODE_ENV === "production") {
-        let error = {...err}; //meng hardcopy error file
+        let error = {...err}; //meng hardcopy error status
 
         if(error.name === "CastError") error = handleErrorDB(error); //jika tipenya CastError maka dihandle fungsi handler err DB
-        if(error.code === 11000) error = handleDuplicateFieldsDB(error);
+        if(error.code === 11000) error = handleDuplicateFieldsDB(error); //jika kode error 11000 duplicated mongoDB
+        if(error.name === "ValidationError") error = handleValidationErrorDB(error); //jika tipenya ValidationError maka dihandle
+                                                                                    //fungsi handler Validation Err
 
         errProd(error, res);
     }
