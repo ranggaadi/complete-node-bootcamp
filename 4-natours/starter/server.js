@@ -21,7 +21,8 @@ const server = app.listen(port, () => {
 });
 
 
-//unhandled rejection biasa terjadi pada kesalahan DB (terjadi diluar applikasi express) maka perlu ditangani
+//unhandled rejection terjadi apabila suatu async function (mereturn promise) tidak dihandle / tidak di catch biasa terjadi 
+//pada kesalahan DB (terjadi diluar applikasi express) maka perlu ditangani
 //untuk mengetes kasusnya rubah value port dari variabel DATABASE_LOCAL pada config.env lalu save server.js,
 //apabila masih baik baik saja coba lakukan request.
 
