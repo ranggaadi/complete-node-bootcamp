@@ -70,3 +70,22 @@ exports.login = catchAsync(async (req, res, next) => {
         token
     })
 })
+
+exports.protect = catchAsync(async (req, res, next) => {
+    let token;
+
+    // 1.) dapatkan token, dan cek apakah token tersebut ada
+    //untuk mendapatkannya dapat didapat di request header dengan ketentuan umum pada attrib Authorization: Bearer {token}
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
+        token = req.headers.authorization.split(' ')[1]; //melepas "Bearer" dan mengambil tokennya saja
+    }
+
+    if(!token){ //jika ternyata token tidak ada maka akan mereturn error
+        return next(new CustomError("You're not yet logged in!, Pleas login first", 401));
+    }
+
+    // 2.) verifikasi token
+    // 3.) periksa apakah user masih ada
+    // 4.) periksa apakah user merubah passwordnya setelah token diproses / dibuat
+    next();
+});
