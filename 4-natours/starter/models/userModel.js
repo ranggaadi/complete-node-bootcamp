@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema({
             },
             message: "the confirmed password must be the same with the password"
         }
-    }
+    },
+    passwordChangedAt: Date
 })
 
 //middleware berjalan sebelum data disave ke database (digunakan untuk hasing password)
@@ -62,6 +63,15 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
     return await bcrypt.compare(candidatePassword, userPassword) //mereturn boolean password benar apa salah
 }
 
+userSchema.methods.changedPasswordAfter = function(JWTTimeStamp) {
+    if(this.passwordChangedAt){
+        const changedTime = this.passwordChangedAt.getTime() / 1000;
+        console.log(changedTime, JWTTimeStamp);
+        return changedTime > JWTTimeStamp;
+    }
+    
+    return false;
+}
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

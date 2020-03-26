@@ -17,6 +17,10 @@ const handleValidationErrorDB = err => {
     return new CustomError(message, 400);
 }
 
+const handleJWTError = () => new CustomError('Invalid token!, please login again.', 401);
+
+const handleExpiredJWTError = () => new CustomError('Token already expired, please login again.', 401);
+
 const errProd = (err, res) => {
     //Operasional error: mengirim pesan error ke client
     if(err.isOperational){
@@ -62,6 +66,8 @@ module.exports = (err, req, res, next) => {
         if(error.code === 11000) error = handleDuplicateFieldsDB(error); //jika kode error 11000 duplicated mongoDB
         if(error.name === "ValidationError") error = handleValidationErrorDB(error); //jika tipenya ValidationError maka dihandle
                                                                                     //fungsi handler Validation Err
+        if(error.name === "JsonWebTokenError") error = handleJWTError();
+        if(error.name === "TokenExpiredError") error = handleExpiredJWTError();
 
         errProd(error, res);
     }

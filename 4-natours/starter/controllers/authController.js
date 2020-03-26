@@ -1,3 +1,4 @@
+const {promisify} = require('util'); //destructuring, ambil fungsi promisify aja
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -19,7 +20,9 @@ exports.signup = catchAsync(async (req, res, next) => {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        confirmPassword: req.body.confirmPassword
+        confirmPassword: req.body.confirmPassword,
+        photo: req.body.photo,
+        passwordChangedAt: req.body.passwordChangedAt
     });
 
     const token = signToken(newUser._id);
@@ -71,6 +74,8 @@ exports.login = catchAsync(async (req, res, next) => {
     })
 })
 
+
+
 exports.protect = catchAsync(async (req, res, next) => {
     let token;
 
@@ -85,7 +90,24 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
 
     // 2.) verifikasi token
+    // jwt.verify(token, process.env.JWT_SECRET); karena valuenya dilakukan melalui callback maka dipromisify aja
+    const decodedJWT = await promisify(jwt.verify)(token, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
+    console.log(decodedJWT)
     // 3.) periksa apakah user masih ada
+    const currentUser = await User.findById(decodedJWT.id);
+    if(!currentUser){
+        return next(new CustomError('The user belonging to this token does no longer exist', 401));
+    }
+
     // 4.) periksa apakah user merubah passwordnya setelah token diproses / dibuat
+    if(currentUser.changedPasswordAfter(decodedJWT.iat)){
+        return next(new CustomError('User recently changed password!, please login again.', 401));
+    }
+
+
+    req.user = currentUser //disimpan disini siapa tau dibutuhkan, (dioper / disimpan ke req.user)
+
+    
+    //Jika semua kasus terlewati maka Ijinkan masuk ke getAllTour
     next();
 });
