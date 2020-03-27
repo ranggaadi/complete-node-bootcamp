@@ -86,15 +86,15 @@ exports.updateTour = catchAsync(async (req, res, next) => {
         new: true, //akan mereturn yang telah diupdate
         runValidators: true //akan melalukan pengecekan lagi sesuai schema
     }, (err) => {
-        if(err){
-            if(err.name == "ValidationError"){
+        if (err) {
+            if (err.name == "ValidationError") {
                 flag = false;
                 return next(err)
             }
         }
     });
 
-    if(flag){
+    if (flag) {
         if (!tour.length) {
             return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
         }
@@ -111,10 +111,14 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
+    let flag = undefined
+    let tour = await Tour.findByIdAndDelete(req.params.id, (err, val) => {
+        if (val) flag = val;
+    });
 
-    const tour = await Tour.findByIdAndDelete(req.params.id, () => { });
+    tour = flag;
 
-    if (!tour.length) {
+    if (!tour) {
         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
     }
 

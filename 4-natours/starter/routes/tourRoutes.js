@@ -23,7 +23,7 @@ router.route('/')   //authcontroller.protect digunakan untuk melindungi route da
 router.route('/:id')
 .get(toursController.getTour)
 .patch(toursController.updateTour)
-.delete(toursController.deleteTour);
+.delete(authController.protect, authController.restrictTo('lead-guide', 'admin'), toursController.deleteTour);
 
 
 // router.route('/4fun')

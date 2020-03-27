@@ -19,6 +19,15 @@ const userSchema = new mongoose.Schema({
         validate: [validator.isEmail, "Please provide a valid email"]  
     },
     photo: String,
+    role: {
+        type: String,
+        default: "user",
+        enum: {
+            values: ['user', 'guide', 'lead-guide', 'admin'],
+            message: "role is either: user, guide, lead-guide or admin"
+        },
+        select: false
+    },
     password:  {
         type: String,
         required: [true, "Please provide a password"],
@@ -39,7 +48,10 @@ const userSchema = new mongoose.Schema({
             message: "the confirmed password must be the same with the password"
         }
     },
-    passwordChangedAt: Date
+    passwordChangedAt: {
+        type: Date,
+        default: Date.now()
+    }
 })
 
 //middleware berjalan sebelum data disave ke database (digunakan untuk hasing password)
@@ -66,7 +78,6 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
 userSchema.methods.changedPasswordAfter = function(JWTTimeStamp) {
     if(this.passwordChangedAt){
         const changedTime = this.passwordChangedAt.getTime() / 1000;
-        console.log(changedTime, JWTTimeStamp);
         return changedTime > JWTTimeStamp;
     }
     

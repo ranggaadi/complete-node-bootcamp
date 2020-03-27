@@ -22,7 +22,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
         photo: req.body.photo,
-        passwordChangedAt: req.body.passwordChangedAt
+        passwordChangedAt: req.body.passwordChangedAt,
+        role: req.body.role
     });
 
     const token = signToken(newUser._id);
@@ -89,12 +90,14 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new CustomError("You're not yet logged in!, Pleas login first", 401));
     }
 
+
     // 2.) verifikasi token
+
     // jwt.verify(token, process.env.JWT_SECRET); karena valuenya dilakukan melalui callback maka dipromisify aja
     const decodedJWT = await promisify(jwt.verify)(token, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
-    console.log(decodedJWT)
+  
     // 3.) periksa apakah user masih ada
-    const currentUser = await User.findById(decodedJWT.id);
+    const currentUser = await User.findById(decodedJWT.id).select('+role');
     if(!currentUser){
         return next(new CustomError('The user belonging to this token does no longer exist', 401));
     }
@@ -104,10 +107,20 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new CustomError('User recently changed password!, please login again.', 401));
     }
 
+    req.user = currentUser //disimpan disini siapa tau dibutuhkan (akan dioper ke restrictTo middleware), 
+    //(dioper / disimpan ke req.user)
 
-    req.user = currentUser //disimpan disini siapa tau dibutuhkan, (dioper / disimpan ke req.user)
-
-    
     //Jika semua kasus terlewati maka Ijinkan masuk ke getAllTour
     next();
 });
+
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+
+        if(!roles.includes(req.user.role)){
+            return next(new CustomError("You don't have permission to perform this action", 403));
+        }
+
+        next();
+    }
+} 
