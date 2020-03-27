@@ -75,7 +75,28 @@ exports.login = catchAsync(async (req, res, next) => {
     })
 })
 
+exports.forgotPassword =catchAsync(async (req, res, next) => {
+    // 1.) get user email based on POSTed email and check if its exist
+    const user = await User.findOne({email: req.body.email})
+        // .select('+passwordResetToken', '+passwordResetExpire');
+    
+    console.log(user);
 
+    if(!user){
+        return next(new CustomError('There is no user with email address.', 404));
+    }
+
+    // 2.) Generate random reset token
+    const resetToken = user.generateResetPasswordToken();
+    await user.save({validateBeforeSave: false}); //karena pada method generateResetPasswordToken() hanya mengupdate (passwordResetToken dan passwordResetExpire)
+    //maka perlu dilakukan save dengan option tidak memvalidasi ulang karena pada schema ada beberapa variabel yang required
+
+    // 3.) Send it to user email
+});
+
+exports.resetPassword = (req, res, next) => {
+    //kode disini
+}
 
 exports.protect = catchAsync(async (req, res, next) => {
     let token;
@@ -87,7 +108,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
 
     if(!token){ //jika ternyata token tidak ada maka akan mereturn error
-        return next(new CustomError("You're not yet logged in!, Pleas login first", 401));
+        return next(new CustomError("You're not yet logged in!, Please login first", 401));
     }
 
 
