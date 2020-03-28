@@ -84,7 +84,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     let flag = true;
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
         new: true, //akan mereturn yang telah diupdate
-        runValidators: true //akan melalukan pengecekan lagi sesuai schema
+        runValidators: true //akan melalukan pengecekan lagi sesuai schema,
     }, (err) => {
         if (err) {
             if (err.name == "ValidationError") {

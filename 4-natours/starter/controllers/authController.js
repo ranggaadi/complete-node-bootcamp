@@ -4,6 +4,7 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const CustomError = require('./../utils/customError');
 const sendEmail = require('./../utils/email');
+const crypto = require('crypto');
 
 
 const signToken = id => {
@@ -79,7 +80,7 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 1.) get user email based on POSTed email and check if its exist
     const user = await User.findOne({email: req.body.email})
-        .select('+passwordResetToken +passwordResetExpire');
+        // .select('+passwordResetToken +passwordResetExpire');
     
     console.log(user);
 
@@ -120,9 +121,32 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     }
 });
 
-exports.resetPassword = (req, res, next) => {
-    //kode disini
-}
+exports.resetPassword = catchAsync(async (req, res, next) => {
+    //1.) dapatkan user berdasarkan token
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await User.findOne({passwordResetToken: hashedToken, passwordResetExpire: {$gt: Date.now()}});
+
+    //2.) jika token tidak kadaluarsa (waktunya), dan ada user benar benar ada, maka set password baru
+    if(!user){
+        return next(new CustomError("Token is invalid or already expired!",400));
+    }
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpire = undefined;
+    await user.save(); //pada kasus ini kita perlu validator
+
+    //3.) Update changedPasswordAt (melalui middleware mongobd pre save)
+
+    //4.) Log in user, kirim JWT
+    const token = signToken(user._id);
+
+    res.status(200).json({
+        status: "success",
+        token
+    })
+})
 
 exports.protect = catchAsync(async (req, res, next) => {
     let token;
@@ -144,7 +168,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     const decodedJWT = await promisify(jwt.verify)(token, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
   
     // 3.) periksa apakah user masih ada
-    const currentUser = await User.findById(decodedJWT.id).select('+role');
+    const currentUser = await User.findById(decodedJWT.id).select('+role'); //memilih role agar bisa dioper ke restrictTo
     if(!currentUser){
         return next(new CustomError('The user belonging to this token does no longer exist', 401));
     }

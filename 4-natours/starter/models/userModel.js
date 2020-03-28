@@ -51,7 +51,9 @@ const userSchema = new mongoose.Schema({
     },
     passwordChangedAt: {
         type: Date,
-        default: Date.now()
+        default: Date.now() - 1000 //dikurangi sedetik karena biasanya pengesavean pada db lebih lama daripada jwt digenerate
+        //dan apabila terjadi (passChangedAt > jwtIssuedTimestramp) maka user tidak bisa login, sehingga untuk menjamin, waktu
+        //dikurangi sedetik
     },
     passwordResetToken: {
         type: String,
@@ -77,6 +79,17 @@ userSchema.pre('save', async function (next) {
     next();
 })
 
+//middleware presave yang digunakan untuk mengupdate passwordChangedAt setelah reset password
+userSchema.pre('save', function(next){
+    if(!this.isModified('password') || this.isNew) return next();
+
+    this.passwordChangedAt = Date.now() - 1000; //dikurangi sedetik karena biasanya pengesavean pada db lebih lama daripada jwt digenerate
+    //dan apabila terjadi (passChangedAt > jwtIssuedTimestramp) maka user tidak bisa login, sehingga untuk menjamin, waktu
+    //dikurangi sedetik 
+    
+    next();
+});
+
 //instanced schema, sehingga fungsi yang dibuat bisa dipanggil dari hasil instansiasi userSchema
 //candidatePassword = password yang akan dicek
 //userPassword = password yang di hash
@@ -86,7 +99,7 @@ userSchema.methods.correctPassword = async function (candidatePassword, userPass
 
 userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
     if (this.passwordChangedAt) {
-        const changedTime = this.passwordChangedAt.getTime() / 1000;
+        const changedTime = this.passwordChangedAt.getTime() / 1000; //dijadikan detik
         return changedTime > JWTTimeStamp;
     }
 
