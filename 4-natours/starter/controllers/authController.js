@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const CustomError = require('./../utils/customError');
+const sendEmail = require('./../utils/email');
 
 
 const signToken = id => {
@@ -75,10 +76,10 @@ exports.login = catchAsync(async (req, res, next) => {
     })
 })
 
-exports.forgotPassword =catchAsync(async (req, res, next) => {
+exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 1.) get user email based on POSTed email and check if its exist
     const user = await User.findOne({email: req.body.email})
-        // .select('+passwordResetToken', '+passwordResetExpire');
+        .select('+passwordResetToken +passwordResetExpire');
     
     console.log(user);
 
@@ -92,6 +93,31 @@ exports.forgotPassword =catchAsync(async (req, res, next) => {
     //maka perlu dilakukan save dengan option tidak memvalidasi ulang karena pada schema ada beberapa variabel yang required
 
     // 3.) Send it to user email
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
+
+    const message = `Forgot your password? then simply submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+    
+    const options = {
+        email: user.email,
+        message,
+        subject: "Your password reset token (valid in 1 hour)"
+    }
+    
+    try{
+        await sendEmail(options);
+    
+        res.status(200).json({
+            status: "success",
+            message: "Email for resetting password sended!"
+        })
+    }catch(err){
+        user.passwordResetToken = undefined;
+        user.passwordResetExpire = undefined;
+
+        await user.save({validateBeforeSave: false});
+
+        return next(new CustomError('There was an error while sending an email, Please try again later', 500));
+    }
 });
 
 exports.resetPassword = (req, res, next) => {
