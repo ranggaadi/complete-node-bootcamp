@@ -6,7 +6,6 @@ const CustomError = require('./../utils/customError');
 const sendEmail = require('./../utils/email');
 const crypto = require('crypto');
 
-
 const signToken = id => {
     // return jwt.sign({ id: id}, process.env.JWT_SECRET, {
     //     expiresIn: process.env.JWT_EXPIRE_TIME
@@ -20,6 +19,20 @@ const signToken = id => {
 const createSendToken = (user, statusCode, res, req) => {
     const token = signToken(user._id);
 
+    let cookieOption = {
+        httpOnly: true,
+        expires: new Date(Date.now()+process.env.JWT_COOKIE_EXPIRE*24*60*60*1000) //diubah menjadi ms
+    }
+
+    //opsi secure hanya diterapkan ketika production, karena hanya akan berjalan pada protocol https
+    if(process.env.NODE_ENV === 'production') cookieOption.secure = true
+
+    res.cookie('jwt', token, cookieOption);
+
+
+    //menghilangkan field field sensitive
+    user.password = undefined;
+    
     res.status(statusCode).json({
         status: "success",
         token,
@@ -29,6 +42,7 @@ const createSendToken = (user, statusCode, res, req) => {
         }
     })
 }
+
 exports.signup = catchAsync(async (req, res, next) => {
     const newUser = await User.create({
         name: req.body.name,
