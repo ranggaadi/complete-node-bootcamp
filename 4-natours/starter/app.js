@@ -2,6 +2,7 @@ const morgan = require('morgan');
 const express = require('express');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 const xssClean = require('xss-clean');
 const rateLimit = require('express-rate-limit');
 const app = express();
@@ -32,6 +33,14 @@ app.use(mongoSanitize());
 
 //Sanitize (menghilangkan code code ilegal) untuk mencegah XSS
 app.use(xssClean());
+
+//Untuk mengatasi masalah HTTP Parameter polution
+// contoh localhost:8000/api/v1/tours?sort=duration&sort=price
+app.use(hpp({
+    // dan ini adalah yang diijinkan misal localhost:8000/api/v1/tours?duration=5&price=1997
+    //maka akan menjalankan keduanya, bukan salah satu query terakhir seperti tanpa HPP
+    whitelist: ['duration', 'ratingsQuantity', 'ratingsAverage', 'difficulty', 'maxGroupSize', 'price']
+}))
 
 
 // menggunakan express rate limit sehingga dapat menghindari serangan DOS dengan melimit request dalam satuan waktu
