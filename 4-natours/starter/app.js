@@ -1,5 +1,6 @@
 const morgan = require('morgan');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const app = express();
 
 const CustomError = require('./utils/customError');
@@ -14,6 +15,17 @@ const userRouter = require('./routes/userRoutes');
 if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
+
+// menggunakan express rate limit sehingga dapat menghindari serangan DOS dengan melimit request dalam satuan waktu
+// variabel limiter akan mereturn sebuah middleware
+
+const limiter = rateLimit({
+    max: 3,
+    windowMs: 60*60*1000, //dalam satu jam tiap ip diberi limit 100
+    message: "Too many request from this IP, please try again in 1 hour!" //pesan yang akan dikirim jika melewati batas
+})
+
+app.use('/api', limiter); //limit hanya akan berlaku pada request pada API
 
 app.use(express.json());
 

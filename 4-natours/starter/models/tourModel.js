@@ -95,7 +95,9 @@ const tourSchema = new mongoose.Schema({
 //akan membuat document virtual bernama durationInHours
 // kenapa tidak memakai arrow function? karena dalam arrow function tidak mendapat thisnya sendiri
 tourSchema.virtual("durationInHours").get(function(){
-    return this.duration*24;
+    if(this.duration){
+        return this.duration*24;
+    }
 })
 
 
