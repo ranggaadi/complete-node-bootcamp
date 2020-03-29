@@ -1,6 +1,8 @@
 const morgan = require('morgan');
 const express = require('express');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('xss-clean');
 const rateLimit = require('express-rate-limit');
 const app = express();
 
@@ -20,17 +22,26 @@ if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
 
+//melimit body dari req.body sehingga apabila lebih dari 10kb akan ditolak
+app.use(express.json({limit: "10kb"}));
+
+
+//Sanitize (menghilangkan code code ilegal) untuk mencegah NoSQL injection 
+app.use(mongoSanitize());
+
+
+//Sanitize (menghilangkan code code ilegal) untuk mencegah XSS
+app.use(xssClean());
+
+
 // menggunakan express rate limit sehingga dapat menghindari serangan DOS dengan melimit request dalam satuan waktu
 // variabel limiter akan mereturn sebuah middleware
 const limiter = rateLimit({
-    max: 3,
+    max: 100,
     windowMs: 60*60*1000, //dalam satu jam tiap ip diberi limit 100
     message: "Too many request from this IP, please try again in 1 hour!" //pesan yang akan dikirim jika melewati batas
 })
 app.use('/api', limiter); //limit hanya akan berlaku pada request pada API
-
-//melimit body dari req.body sehingga apabila lebih dari 10kb akan ditolak
-app.use(express.json({limit: "10kb"}));
 
 //serve static file
 app.use(express.static(`${__dirname}/public`)); //menjadikan folder public menjadi root
