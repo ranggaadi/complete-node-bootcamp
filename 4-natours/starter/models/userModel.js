@@ -62,6 +62,11 @@ const userSchema = new mongoose.Schema({
     passwordResetExpire: {
         type: Date,
         select: false
+    },
+    active: {
+        type: Boolean,
+        select: false,
+        default: true
     }
 })
 
@@ -89,6 +94,13 @@ userSchema.pre('save', function(next){
     
     next();
 });
+
+userSchema.pre(/^find/, function(next){
+    // ambil yang active saja
+    
+    this.find({active: {$ne: false}});
+    next();
+})
 
 //instanced schema, sehingga fungsi yang dibuat bisa dipanggil dari hasil instansiasi userSchema
 //candidatePassword = password yang akan dicek

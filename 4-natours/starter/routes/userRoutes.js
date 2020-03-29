@@ -10,6 +10,8 @@ router.patch('/reset-password/:token', authController.resetPassword)
 router.patch('/update-password', authController.protect, authController.updatePassword);
 router.patch('/update-profile', authController.protect, usersController.updateMe);
 
+router.delete('/delete-account', authController.protect, usersController.deleteMe);
+
 router.route('/')
 .get(usersController.getAllUsers)
 .post(usersController.createUser);

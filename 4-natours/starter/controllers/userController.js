@@ -63,6 +63,18 @@ exports.updateUser = (req, res) => {
         message: 'This API not yet implemented'
     })
 }
+
+exports.deleteMe = catchAsync(async(req, res, next)=> {
+    // apabila terdapat pemanggilan req.user, maka diharuskan login terlebih dahulu, karena req.user dibentuk oleh
+    //method protect pada 
+    await User.findByIdAndUpdate(req.user.id, {active: false});
+
+    res.status(204).json({
+        status: "success",
+        data: null
+    })
+})
+
 exports.deleteUser = (req, res) => {
     res.status(500).json({
         status: 'error',
