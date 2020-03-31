@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const User = require('./userModel');
 
 //dibawah ini adalah schema
 const tourSchema = new mongoose.Schema({
@@ -109,7 +110,9 @@ const tourSchema = new mongoose.Schema({
             address: String,
             day: Number
         }
-    ]
+    ],
+    guides: Array //nanti diisi userId
+
 }, {                             //BLOK ini adalah Opsi schema
     toJSON: {virtuals: true},   //ini berarti apabila schema dijadikan JSON atau Object maka akan menyertakan document virtual
     toObject: {virtuals: true}
@@ -135,6 +138,12 @@ tourSchema.pre("save", function(next){
     next();
 });
 
+// pre save middleware untuk embedding userid ke tours (guide property)
+tourSchema.pre("save", async function(next){
+    const guidePromises = this.guides.map(async id => await User.findById(id));
+    this.guides = await Promise.all(guidePromises);
+    next();
+});
 
 // QUERY middleware : akan menjalankan fungsi sebelum query dimulai (pre) dan sesudah query dijalankan (post)
 
