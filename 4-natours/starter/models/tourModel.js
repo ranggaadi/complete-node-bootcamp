@@ -85,7 +85,31 @@ const tourSchema = new mongoose.Schema({
         select: false //apabila select bernilai false maka tidak akan ditampilkan pada client
         //bermanfaat apabila data yang ada bersifat sensitif
     },
-    startDates: [Date]
+    startDates: [Date],
+    startLocation: {
+        //deklarasi type untuk GeoJSON
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        description: String,
+        address: String
+    },
+    locations: [ //untuk melakukan embedded document dapat dilakukan seperti berikut
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            description: String,
+            address: String,
+            day: Number
+        }
+    ]
 }, {                             //BLOK ini adalah Opsi schema
     toJSON: {virtuals: true},   //ini berarti apabila schema dijadikan JSON atau Object maka akan menyertakan document virtual
     toObject: {virtuals: true}
