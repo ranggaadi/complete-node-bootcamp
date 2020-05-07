@@ -50,7 +50,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     //     }
     // });
 
-    const tour = await Tour.find({ _id: req.params.id });
+    const tour = await Tour.find({ _id: req.params.id })
 
     if (!tour.length) {
         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));

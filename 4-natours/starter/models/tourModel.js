@@ -160,6 +160,12 @@ tourSchema.pre(/^find/, function(next){
     next();
 })
 
+// query middleware untuk mengeset populate pada setiap findByID
+tourSchema.pre(/^find/, function(next){
+    this.populate({path: 'guides', select: '-__v -passwordChangedAt'});
+    next();
+})
+
 tourSchema.post(/^find/, function(docs, next){
     console.log(`Query dijalankan dalam waktu ${Date.now()-this.start} ms!`); //untuk mencetak waktu eksekusi sejak fungsi pre berjalan
     console.log("Object returned:", docs.length);
