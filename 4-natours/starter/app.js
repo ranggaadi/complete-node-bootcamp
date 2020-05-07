@@ -11,6 +11,7 @@ const CustomError = require('./utils/customError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 // #### GLOBAL MIDDLEWARE
 // NB : pada middleware harus selalu ada next
@@ -73,6 +74,7 @@ app.use((req, res, next) => {
 //  karena menggunakan middleware berupa routing pada path tertentu
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter); 
+app.use('/api/v1/reviews', reviewRouter);
 
 
 
