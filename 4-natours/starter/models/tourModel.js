@@ -117,7 +117,6 @@ const tourSchema = new mongoose.Schema({
             ref: 'User' //bahkan kita tidak perlu import model dari userModel
         }
     ]
-
 }, {                             //BLOK ini adalah Opsi schema
     toJSON: {virtuals: true},   //ini berarti apabila schema dijadikan JSON atau Object maka akan menyertakan document virtual
     toObject: {virtuals: true}
@@ -132,7 +131,12 @@ tourSchema.virtual("durationInHours").get(function(){
     }
 })
 
-
+//virtual populate
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id'
+})
 // Mongoose middleware: mongoose juga memiliki fungsi middleware yang terdiri dari document, query, aggregate, dan model middleware
 
 // DOCUMENT middleware : akan menjalankan fungsi sebelum fungsi .save() atau .create() (tidak berlaku untuk insertMany dkk.)
