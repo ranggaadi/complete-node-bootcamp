@@ -34,6 +34,13 @@ exports.getReview= catchAsync(async(req, res, next) => {
 });
 
 exports.createReview = catchAsync(async(req, res, next) => {
+
+    //dibawah ini digunakan untuk nested tour, yang apabila tidak terdapat key tour pada body
+    //maka akan mengambil parameter dari url begitu juga dengan user, hanya saja user mengambil
+    //id melalui id yang sudah login
+    if(!req.body.tour) req.body.tour = req.params.tourId;
+    if(!req.body.user) req.body.user = req.user.id;
+
     const newReview = await Review.create(req.body);
 
     res.status(201).json({
