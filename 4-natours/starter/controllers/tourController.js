@@ -2,6 +2,8 @@ const Tour = require('./../models/tourModel');
 const APIfeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const CustomError = require('./../utils/customError');
+const factory = require('./controllerFactory');
+
 // const fs = require('fs');
 
 // // top level code untuk meng json kan file tours-simple.json
@@ -21,113 +23,65 @@ exports.alias = (req, res, next) => {
 }
 
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
 
-    // const tours = await Tour.find();
-    const feature = new APIfeatures(Tour.find(), req.query)
-        .filter()
-        .sort()
-        .project()   //sama seperti select pada db
-        .paginate();
+//menggunakan handler factory (controllerFactory) agar lebih rapi
 
-    const tours = await feature.query; //tidak menggunakan await karena nantinya query akan dichaining sehingga harus dipisah
+exports.getAllTours = factory.getAll(Tour);
+exports.getTour = factory.getOne(Tour, {path: "reviews"});
+exports.createATour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
 
-    res.status(200).json({
-        status: "success",
-        requestedAt: req.reqTime,
-        results: tours.length,
-        data: {
-            tours
-        }
-    })
-})
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//     let flag = true;
+//     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//         new: true, //akan mereturn yang telah diupdate
+//         runValidators: true //akan melalukan pengecekan lagi sesuai schema,
+//     }, (err) => {
+//         if (err) {
+//             if (err.name == "ValidationError") {
+//                 flag = false;
+//                 return next(err)
+//             }
+//         }
+//     });
 
-exports.getTour = catchAsync(async (req, res, next) => {
+//     if (flag) {
+//         if (!tour.length) {
+//             return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+//         }
 
-    // const tour = await Tour.findById(req.params.id, (err) => {
-    //     if(err){
-    //         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404)); //untuk diurus pada custom error
-    //     }
-    // });
-
-    const tour = await Tour.find({ _id: req.params.id }).populate('reviews');
-
-    if (!tour.length) {
-        return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
-    }
-
-    res.status(200).json({
-        status: "success",
-        data: {
-            tour
-        }
-    })
-})
-
-exports.createATour = catchAsync(async (req, res, next) => {
-    // const newTour = new Tour({})
-    // newTour.save()
-
-    const newTour = await Tour.create(req.body);
-
-    res.status(201).json({
-        status: "success",
-        requestedAt: req.reqTime,
-        data: {
-            tour: newTour
-        }
-    });
-
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-    let flag = true;
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true, //akan mereturn yang telah diupdate
-        runValidators: true //akan melalukan pengecekan lagi sesuai schema,
-    }, (err) => {
-        if (err) {
-            if (err.name == "ValidationError") {
-                flag = false;
-                return next(err)
-            }
-        }
-    });
-
-    if (flag) {
-        if (!tour.length) {
-            return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
-        }
-
-        res.status(200).json({
-            status: "success",
-            requestedAt: req.reqTime,
-            data: {
-                tour
-            }
-        })
-    }
-})
+//         res.status(200).json({
+//             status: "success",
+//             requestedAt: req.reqTime,
+//             data: {
+//                 tour
+//             }
+//         })
+//     }
+// })
 
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
-    let flag = undefined
-    let tour = await Tour.findByIdAndDelete(req.params.id, (err, val) => {
-        if (val) flag = val;
-    });
+//delete single tour dirubah menjadi dengan menggunakan controllerFactory
+exports.deleteTour = factory.deleteOne(Tour);
 
-    tour = flag;
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//     let flag = undefined
+//     let tour = await Tour.findByIdAndDelete(req.params.id, (err, val) => {
+//         if (val) flag = val;
+//     });
 
-    if (!tour) {
-        return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
-    }
+//     tour = flag;
 
-    res.status(204).json({
-        status: "success",
-        requestedAt: req.reqTime,
-        data: null
-    });
-})
+//     if (!tour) {
+//         return next(new CustomError(`Tour with id: ${req.params.id} doesn't exist`, 404));
+//     }
+
+//     res.status(204).json({
+//         status: "success",
+//         requestedAt: req.reqTime,
+//         data: null
+//     });
+// })
 
 
 exports.getTourStats = catchAsync(async (req, res, next) => {

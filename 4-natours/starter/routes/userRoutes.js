@@ -14,7 +14,6 @@ router.delete('/delete-account', authController.protect, usersController.deleteM
 
 router.route('/')
 .get(usersController.getAllUsers)
-.post(usersController.createUser);
 
 router.route('/:id')
 .get(usersController.getUser)
