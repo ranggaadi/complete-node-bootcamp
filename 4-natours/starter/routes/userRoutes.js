@@ -7,10 +7,15 @@ router.post('/signup', authController.signup)
 router.post('/login', authController.login)
 router.post('/forgot-password', authController.forgotPassword)
 router.patch('/reset-password/:token', authController.resetPassword)
-router.patch('/update-password', authController.protect, authController.updatePassword);
-router.patch('/update-profile', authController.protect, usersController.updateMe);
 
-router.delete('/delete-account', authController.protect, usersController.deleteMe);
+router.use(authController.protect); //semua router dibawah kode ini di protect (harus login)
+
+router.patch('/update-password', authController.updatePassword);
+router.get('/profile', usersController.getMe, usersController.getUser)
+router.patch('/update-profile', usersController.updateMe);
+router.delete('/delete-account', usersController.deleteMe);
+
+router.use(authController.restrictTo('admin')); //semua router dibawah kode harus protect dan harus punya akses admin.
 
 router.route('/')
 .get(usersController.getAllUsers)

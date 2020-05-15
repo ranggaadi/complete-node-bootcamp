@@ -14,11 +14,12 @@ router.route('/top-5-tours').get(toursController.alias, toursController.getAllTo
 // router.route('/top-5-tours').get(toursController.checkTop5Tour, toursController.getAllTours)
 
 router.route('/tours-stats').get(toursController.getTourStats);
-router.route('/monthly-plan/:year').get(toursController.getMonthlyPlan);
+router.route('/monthly-plan/:year')
+    .get(authController.protect, authController.restrictTo('admin', 'lead-guide', 'guide'), toursController.getMonthlyPlan);
 
 router.route('/')   //authcontroller.protect digunakan untuk melindungi route dari user yang bvelum login
-.get(authController.protect, toursController.getAllTours)
-.post(toursController.createATour)
+.get(toursController.getAllTours)
+.post(authController.protect, authController.restrictTo('admin', 'lead-guide'), toursController.createATour)
 
 // router.route('/:check').all(async (req, res) => {
 
@@ -26,7 +27,7 @@ router.route('/')   //authcontroller.protect digunakan untuk melindungi route da
 
 router.route('/:id')
 .get(toursController.getTour)
-.patch(toursController.updateTour)
+.patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), toursController.updateTour)
 .delete(authController.protect, authController.restrictTo('lead-guide', 'admin'), toursController.deleteTour);
 
 // router.route('/:tourId/reviews')
