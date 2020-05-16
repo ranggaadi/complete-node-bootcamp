@@ -4,7 +4,6 @@ const reviewSchema = mongoose.Schema({
     review: {
         type: String,
         required: [true, 'A tour must have a review'],
-        unique: true,
         trim: true,
         minlength: [1, "A tour name must contain not less than or equals to 1 characters"],
     },

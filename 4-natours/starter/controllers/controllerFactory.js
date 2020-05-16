@@ -100,6 +100,7 @@ exports.getAll = Model => catchAsync(async (req, res, next) => {
         .project()   //sama seperti select pada db
         .paginate();
 
+    // const doc = await feature.query.explain(); //digunakan untuk melihat informasi query (explain)
     const doc = await feature.query; //tidak menggunakan await karena nantinya query akan dichaining sehingga harus dipisah
 
     res.status(200).json({

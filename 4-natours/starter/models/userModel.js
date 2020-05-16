@@ -70,30 +70,30 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-//middleware berjalan sebelum data disave ke database (digunakan untuk hashing password)
-userSchema.pre('save', async function (next) {
-    //jika bagian dari password tidak dimodifikasi, maka fungsi tidak akan dijalankan
-    if (!this.isModified('password')) return next();
+// //middleware berjalan sebelum data disave ke database (digunakan untuk hashing password)
+// userSchema.pre('save', async function (next) {
+//     //jika bagian dari password tidak dimodifikasi, maka fungsi tidak akan dijalankan
+//     if (!this.isModified('password')) return next();
 
-    //mengsalt dan menggenerate password yang sudah di hashing dan disimpan kembali ke password
-    //angka 12 adalah cost, dimana semakin besar semakin baik, namun juga meningkatkan intensivitas CPU
-    this.password = await bcrypt.hash(this.password, 12);
+//     //mengsalt dan menggenerate password yang sudah di hashing dan disimpan kembali ke password
+//     //angka 12 adalah cost, dimana semakin besar semakin baik, namun juga meningkatkan intensivitas CPU
+//     this.password = await bcrypt.hash(this.password, 12);
 
-    //digunakan untuk mengilangkan field sebelum disimpan ke database.
-    this.confirmPassword = undefined;
-    next();
-})
+//     //digunakan untuk mengilangkan field sebelum disimpan ke database.
+//     this.confirmPassword = undefined;
+//     next();
+// })
 
-//middleware presave yang digunakan untuk mengupdate passwordChangedAt setelah reset password
-userSchema.pre('save', function(next){
-    if(!this.isModified('password') || this.isNew) return next();
+// //middleware presave yang digunakan untuk mengupdate passwordChangedAt setelah reset password
+// userSchema.pre('save', function(next){
+//     if(!this.isModified('password') || this.isNew) return next();
 
-    this.passwordChangedAt = Date.now() - 1000; //dikurangi sedetik karena biasanya pengesavean pada db lebih lama daripada jwt digenerate
-    //dan apabila terjadi (passChangedAt > jwtIssuedTimestramp) maka user tidak bisa login, sehingga untuk menjamin, waktu
-    //dikurangi sedetik 
+//     this.passwordChangedAt = Date.now() - 1000; //dikurangi sedetik karena biasanya pengesavean pada db lebih lama daripada jwt digenerate
+//     //dan apabila terjadi (passChangedAt > jwtIssuedTimestramp) maka user tidak bisa login, sehingga untuk menjamin, waktu
+//     //dikurangi sedetik 
     
-    next();
-});
+//     next();
+// });
 
 userSchema.pre(/^find/, function(next){
     // ambil yang active saja

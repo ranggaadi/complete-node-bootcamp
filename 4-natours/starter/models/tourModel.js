@@ -122,6 +122,10 @@ const tourSchema = new mongoose.Schema({
     toObject: {virtuals: true}
 })
 
+// menggunakan index untuk optimasi pencarian 1 ascending, -1 descending
+// tourSchema.index({price: 1}); //single index
+tourSchema.index({price: 1, ratingsAverage: -1}); //compound index
+tourSchema.index({slug: 1}); //digunakan untuk mengquery slug untuk pencarian, maka baiknya diset index.
 
 //akan membuat document virtual bernama durationInHours
 // kenapa tidak memakai arrow function? karena dalam arrow function tidak mendapat thisnya sendiri
