@@ -22,6 +22,31 @@ exports.alias = (req, res, next) => {
     next();
 }
 
+exports.getToursWithin = catchAsync( async (req, res, next) => {
+    const {distance, latlng, unit} = req.params;
+    const [lat, lng] = latlng.split(',');
+
+    //perlu diubah menjadi radians dengan membaginya dengan radius dari bumi
+    //ternary pertama apabila dalam satuan mile dan kedua dalam satuan km
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+    if(!lat || !lng){
+        return next(new CustomError('please provide latitude and longitude', 400));
+    }
+
+    //menggunakan geospatial operator geoWithin
+    const tours = await Tour.find({startLocation: {$geoWithin: {$centerSphere: [[lng, lat], radius]} }});
+
+    // console.log(distance, lat, lng, unit);
+    res.status(200).json({
+        status: "success",
+        results: tours.length,
+        data: {
+            data: tours
+        }
+    })
+})
+
 
 
 //menggunakan handler factory (controllerFactory) agar lebih rapi
@@ -30,6 +55,9 @@ exports.getAllTours = factory.getAll(Tour);
 exports.getTour = factory.getOne(Tour, {path: "reviews"});
 exports.createATour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
+
+//delete single tour dirubah menjadi dengan menggunakan controllerFactory
+exports.deleteTour = factory.deleteOne(Tour);
 
 // exports.updateTour = catchAsync(async (req, res, next) => {
 //     let flag = true;
@@ -61,8 +89,6 @@ exports.updateTour = factory.updateOne(Tour);
 // })
 
 
-//delete single tour dirubah menjadi dengan menggunakan controllerFactory
-exports.deleteTour = factory.deleteOne(Tour);
 
 // exports.deleteTour = catchAsync(async (req, res, next) => {
 //     let flag = undefined

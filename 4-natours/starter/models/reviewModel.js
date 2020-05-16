@@ -34,10 +34,14 @@ const reviewSchema = mongoose.Schema({
     toObject: { virtuals: true }
 })
 
+
+//gabungan table kolom user dan tour harus unique (mencegah review lebih dari 1 dari user yang sama)
+reviewSchema.index({user: 1, tour: 1}, {unique: true});
+
 reviewSchema.pre(/^find/, function (next) {
     // this.populate({path: "tour", select: "name"})
     //     .populate({path: "user", select: "name photo"});
-
+    
     this.populate({ path: "user", select: "name photo" });
     next();
 })
@@ -73,6 +77,7 @@ reviewSchema.statics.calcAvgRatings = async function (tourId) {
         })
     }
 }
+
 
 //on post agar reviewnya disimpan terlebih dahulu
 reviewSchema.post('save', function () {

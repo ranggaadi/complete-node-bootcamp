@@ -38,6 +38,9 @@ const tourSchema = new mongoose.Schema({
         default: 4.5,
         min: [1, "Rating must be above 1.0"],
         max: [5, "Rating must be below 5.0"],
+
+        //set adalah method yang akan selalu dijalankan disetiap pengesetan value baru
+        set: val => Math.round(val * 10) / 10 //4.666, 46.66 47 4,7
     },
     ratingsQuantity: {
         type: Number,
@@ -126,6 +129,9 @@ const tourSchema = new mongoose.Schema({
 // tourSchema.index({price: 1}); //single index
 tourSchema.index({price: 1, ratingsAverage: -1}); //compound index
 tourSchema.index({slug: 1}); //digunakan untuk mengquery slug untuk pencarian, maka baiknya diset index.
+
+//index dibawah ini digunakan untuk dapat melakukan query menggunakan geoJSON (geospatial data)
+tourSchema.index({ startLocation: "2dsphere"});
 
 //akan membuat document virtual bernama durationInHours
 // kenapa tidak memakai arrow function? karena dalam arrow function tidak mendapat thisnya sendiri
