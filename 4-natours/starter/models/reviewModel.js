@@ -15,7 +15,7 @@ const reviewSchema = mongoose.Schema({
         max: [5, "Rating must be below 5.0"],
     },
     createdAt: {
-        type:Date,
+        type: Date,
         default: Date.now(),
         select: false
     },
@@ -30,43 +30,78 @@ const reviewSchema = mongoose.Schema({
         required: [true, "Review must belong to a user."],
     }
 }, {
-    toJSON: {virtuals: true},
-    toObject:{virtuals: true}
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
-reviewSchema.pre(/^find/, function(next){
+reviewSchema.pre(/^find/, function (next) {
     // this.populate({path: "tour", select: "name"})
     //     .populate({path: "user", select: "name photo"});
 
-    this.populate({path: "user", select: "name photo"});
-    next();   
+    this.populate({ path: "user", select: "name photo" });
+    next();
 })
 
-reviewSchema.statics.calcAvgRatings = async function(tourId){
+reviewSchema.statics.calcAvgRatings = async function (tourId) {
+
+    //untuk mendapatkan banyaknya rating pada tiap tour dan rata ratanya
     const stats = await this.aggregate([
         {
-            $match: {tour: tourId}
+            $match: { tour: tourId }
         },
         {
             $group: {
                 _id: '$tour',
-                nRating: {$sum: 1},
-                avgRating: {$avg: '$rating'}
+                nRating: { $sum: 1 },
+                avgRating: { $avg: '$rating' }
             }
         }
     ])
     // console.log(stats);
 
     //mengupdate berdasarkan nilai dari aggregate
-    await Tour.findByIdAndUpdate(tourId, {
-        ratingsQuantity: stats[0].nRating,
-        ratingsAverage: stats[0].avgRating
-    })
+
+    if (stats.length > 0) { //jika hasil aggregate ada maka jalankan
+        await Tour.findByIdAndUpdate(tourId, {
+            ratingsQuantity: stats[0].nRating,
+            ratingsAverage: stats[0].avgRating
+        })
+    } else { //jika tidak ada yang tour id yang memiliki review maka set as default
+        await Tour.findByIdAndUpdate(tourId, {
+            ratingsQuantity: 0,
+            ratingsAverage: 4.5
+        })
+    }
 }
-reviewSchema.post('save', function(){
+
+//on post agar reviewnya disimpan terlebih dahulu
+reviewSchema.post('save', function () {
     //this points to current review
+
+    //untuk menjalankan method pertama kali maka menggunakan this.constructor
     this.constructor.calcAvgRatings(this.tour);
 })
+
+//namun untuk mengupdate ratingsQuantity dan ratingsAverage ketika review dihapus atau diupdate maka
+//menggunakan cara dibawah ini
+
+//kedua querty dibaawah ihi sebenernya adalah shorthand unntuk findOneAndUpdate dan findOneAndDelete
+// findByIdAndUpdate
+// findByIdAndDelete
+
+//maka untuk mengaksesnya dapat digunakan regular expression untuk ini
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+    //dimasukan pada this.review karena akan dioper dari query pre middleware ke post query middleware
+    this.review = await this.findOne();
+    console.log(this.review);
+})
+
+reviewSchema.post(/^findOneAnd/, async function () {
+    // this.review = this pada query ini
+
+    // await this.findOne() tidak bisa dijalankan disini karena, query sudah dijalankan. 
+    await this.review.constructor.calcAvgRatings(this.review.tour);
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;
