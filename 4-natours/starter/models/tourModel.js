@@ -190,8 +190,12 @@ tourSchema.post(/^find/, function(docs, next){
 
 //AGGREGATION MIDDLEWARE
 tourSchema.pre("aggregate", function(next){
+
+    //untuk mengecek apakah ada aggregate $geoNear, karena aggregate $geoNear harus selalu pertama
+    if(!this.pipeline()[0].hasOwnProperty('$geoNear')){
+        this.pipeline().unshift({$match: {isSecretTour: {$ne: true}}}); //memasukan match baru diawal aggregasi
+    } 
     console.log(this.pipeline()) //isi dari aggregate sesuai route yang kita jalankan.
-    this.pipeline().unshift({$match: {isSecretTour: {$ne: true}}}); //memasukan match baru diawal aggregasi
     next();
 });
 

@@ -20,6 +20,9 @@ router.route('/monthly-plan/:year')
 router.route('/tours-within/:distance/center/:latlng/unit/:unit')
     .get(toursController.getToursWithin);
 
+router.route('/distances/:latlng/unit/:unit')
+    .get(toursController.getDistances);
+
 router.route('/')   //authcontroller.protect digunakan untuk melindungi route dari user yang bvelum login
     .get(toursController.getAllTours)
     .post(authController.protect, authController.restrictTo('admin', 'lead-guide'), toursController.createATour)
