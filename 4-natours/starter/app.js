@@ -1,3 +1,4 @@
+const path = require('path');
 const morgan = require('morgan');
 const express = require('express');
 const helmet = require('helmet');
@@ -53,8 +54,14 @@ const limiter = rateLimit({
 })
 app.use('/api', limiter); //limit hanya akan berlaku pada request pada API
 
+//set view engine
+app.set('view engine', 'pug');
+
+//set view folder
+app.set('views', path.join(__dirname, 'views'));
+
 //serve static file
-app.use(express.static(`${__dirname}/public`)); //menjadikan folder public menjadi root
+app.use(express.static(path.join(__dirname, 'public'))); //menjadikan folder public menjadi root
 
 //contoh penggunaan middleware
 // app.use((req, res, next) => {
@@ -69,9 +76,15 @@ app.use((req, res, next) => {
     next();
 })
 
-
+//ROUTER
 //kode dibawah ini disebut mounting router,
 //  karena menggunakan middleware berupa routing pada path tertentu
+
+//route khusus untuk view
+app.get('/', (req, res) => {
+    res.status(200).render('base');
+})
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter); 
 app.use('/api/v1/reviews', reviewRouter);
