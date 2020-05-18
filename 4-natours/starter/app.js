@@ -6,6 +6,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const xssClean = require('xss-clean');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const app = express();
 
 const CustomError = require('./utils/customError');
@@ -28,6 +29,7 @@ if(process.env.NODE_ENV === 'development'){
 
 //melimit body dari req.body sehingga apabila lebih dari 10kb akan ditolak
 app.use(express.json({limit: "10kb"}));
+app.use(cookieParser());
 
 
 //Sanitize (menghilangkan code code ilegal) untuk mencegah NoSQL injection 
@@ -74,6 +76,7 @@ app.use(express.static(path.join(__dirname, 'public'))); //menjadikan folder pub
 //simple middleware untuk mencatat waktu request
 app.use((req, res, next) => {
     req.reqTime = new Date().toISOString();
+    console.log(req.cookies);
     next();
 })
 
@@ -83,7 +86,7 @@ app.use((req, res, next) => {
 
 //route khusus untuk view
 app.use('/', viewsRouter);
- 
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter); 
 app.use('/api/v1/reviews', reviewRouter);

@@ -184,6 +184,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     //untuk mendapatkannya dapat didapat di request header dengan ketentuan umum pada attrib Authorization: Bearer {token}
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         token = req.headers.authorization.split(' ')[1]; //melepas "Bearer" dan mengambil tokennya saja
+    }else if(req.cookies.jwt){
+        token = req.cookies.jwt;
     }
 
     if (!token) { //jika ternyata token tidak ada maka akan mereturn error
