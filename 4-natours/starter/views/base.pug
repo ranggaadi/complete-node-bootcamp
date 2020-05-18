@@ -1,1 +1,18 @@
-h1 Test 123
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        //-bisa menggunakan html sintaks biasa
+        <link rel="stylesheet" href="css/style.css"/> 
+        link(rel="shortcut icon", href="img/favicon.png", type="image/png")
+        title Natours | #{tour}
+    body
+        //- buffered code, code akan dianggap sebagai javascript, jangan ada SEMICOLON
+        h1= tour
+        h2= user.toUpperCase()
+
+        //- unbuferred code, digunakan untuk menuliskan javascript biasa
+        - const x = 9;
+        h3= 2*x
+        //- h1 The Forest Hiker
+        p Aku adalah anak gembala
