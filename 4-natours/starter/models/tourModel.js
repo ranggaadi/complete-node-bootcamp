@@ -176,7 +176,7 @@ tourSchema.pre(/^find/, function(next){
 
 // query middleware untuk mengeset populate pada setiap findByID
 tourSchema.pre(/^find/, function(next){
-    this.populate({path: 'guides', select: '-__v -passwordChangedAt'});
+    this.populate({path: 'guides', select: '-__v -passwordChangedAt +role'});
     next();
 })
 

@@ -1,12 +1,13 @@
 html(lang="en")
     head
-        meta(charset="UTF-8")
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        //-bisa menggunakan html sintaks biasa
-        <link rel="stylesheet" href="css/style.css"/> 
-        link(rel="shortcut icon", href="img/favicon.png", type="image/png")
-        link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
-        title Natours | #{title}
+        block head
+            meta(charset="UTF-8")
+            meta(name="viewport", content="width=device-width, initial-scale=1.0")
+            //-bisa menggunakan html sintaks biasa
+            <link rel="stylesheet" href="/css/style.css"/> 
+            link(rel="shortcut icon", href="/img/favicon.png", type="image/png")
+            link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
+            title Natours | #{title}
     body
         // Header
         include incl/_header.pug
@@ -17,4 +18,7 @@ html(lang="en")
 
         // Footer
         include incl/_footer.pug
+    
+        script(src="/js/mapbox.js")
+
 
