@@ -203,6 +203,11 @@ exports.protect = catchAsync(async (req, res, next) => {
         token = req.cookies.jwt;
     }
 
+    if(!req.originalUrl.startsWith('/api')){
+        if(!token){
+            res.redirect('/login');
+        }
+    }
     if (!token) { //jika ternyata token tidak ada maka akan mereturn error
         return next(new CustomError("You're not yet logged in!, Please login first", 401));
     }

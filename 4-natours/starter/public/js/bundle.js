@@ -8784,7 +8784,7 @@ var _login = require("./login");
 var _mapbox = require("./mapbox");
 
 var mapBox = document.getElementById('map');
-var loginForm = document.querySelector('.form'); // Tombol logout
+var loginForm = document.querySelector('.form--login'); // Tombol logout
 
 var logoutBtn = document.querySelector('.nav__el--logout');
 

@@ -29,6 +29,7 @@ if(process.env.NODE_ENV === 'development'){
 
 //melimit body dari req.body sehingga apabila lebih dari 10kb akan ditolak
 app.use(express.json({limit: "10kb"}));
+app.use(express.urlencoded({extended: true, limit: '10kb'})); //untuk submit dari form biasa
 app.use(cookieParser());
 
 
