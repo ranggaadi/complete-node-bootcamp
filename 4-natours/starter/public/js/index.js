@@ -1,11 +1,12 @@
 import "@babel/polyfill";
-import { login, logout, updateUser } from './login';
+import { login, logout, updateSettings } from './login';
 import { displayMap } from './mapbox';
 
 
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const updateUserForm = document.querySelector('.form-user-data');
+const updatePasswordForm = document.querySelector('.form-user-password');
 
 // Tombol logout
 const logoutBtn = document.querySelector('.nav__el--logout');
@@ -25,8 +26,31 @@ if(updateUserForm){
 
         const username = document.getElementById('name').value
         const email = document.getElementById('email').value
-        console.log(username, email);
-        updateUser(username, email);
+        // console.log(username, email);
+        updateSettings({name: username, email}, 'data');
+    })
+}
+
+if(updatePasswordForm){
+    updatePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        //akan mencetak sejenis loading / proses pada button
+        const btnSavePassword = document.querySelector('.btn--save-password');
+        btnSavePassword.textContent = 'Updating ...';
+
+        const oldPassword = document.getElementById('password-current').value;
+        const newPassword = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('password-confirm').value;
+        await updateSettings({oldPassword, newPassword, confirmPassword}, 'password');
+
+        //menghapus / mengosongkan field dari password
+        document.getElementById('password-current').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('password-confirm').value = '';
+
+        //mengembalikan loading proses apabila proses await dari updateSettings sudah selesai
+        btnSavePassword.textContent = 'Save Password';
     })
 }
 

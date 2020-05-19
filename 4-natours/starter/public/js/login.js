@@ -38,19 +38,19 @@ export const logout = async (req, res) => {
     }
 }
 
-export const updateUser = async (username, email) => {
+export const updateSettings = async (data, type) => {
+
+    const url = type === 'data' ? "http://localhost:8000/api/v1/users/update-profile" 
+                            : "http://localhost:8000/api/v1/users/update-password";
     try{
         const res = await axios({
             method: "PATCH",
-            url: "http://localhost:8000/api/v1/users/update-profile",
-            data: {
-                name: username,
-                email
-            }
+            url,
+            data
         })
 
         if(res.data.status === 'success'){
-            showAlert('success', 'Updating profile success')
+            showAlert('success', `Updating ${type === 'data' ?  type+' profile' : type } success`)
             location.reload(true);
         }
     }catch(err){
