@@ -5,7 +5,9 @@ const router = express.Router();
 
 //mengecek apakah sudah loggin untuk semua route
 router.get('/profile', authController.protect, viewsController.getProfile);
-router.post('/update-profile', authController.protect, viewsController.updateProfile);
+
+//untuk route update menggunakan urlencoded (form biasa)
+// router.post('/update-profile', authController.protect, viewsController.updateProfile);
 
 router.use(authController.isLoggedIn);
 

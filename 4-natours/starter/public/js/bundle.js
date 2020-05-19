@@ -8367,7 +8367,7 @@ exports.showAlert = showAlert;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.logout = exports.login = void 0;
+exports.updateUser = exports.logout = exports.login = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -8474,6 +8474,55 @@ var logout = /*#__PURE__*/function () {
 }();
 
 exports.logout = logout;
+
+var updateUser = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(username, email) {
+    var res;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.prev = 0;
+            _context3.next = 3;
+            return (0, _axios.default)({
+              method: "PATCH",
+              url: "http://localhost:8000/api/v1/users/update-profile",
+              data: {
+                name: username,
+                email: email
+              }
+            });
+
+          case 3:
+            res = _context3.sent;
+
+            if (res.data.status === 'success') {
+              (0, _alerts.showAlert)('success', 'Updating profile success');
+              location.reload(true);
+            }
+
+            _context3.next = 10;
+            break;
+
+          case 7:
+            _context3.prev = 7;
+            _context3.t0 = _context3["catch"](0);
+            (0, _alerts.showAlert)('error', _context3.t0.response.data.message);
+
+          case 10:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[0, 7]]);
+  }));
+
+  return function updateUser(_x5, _x6) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+exports.updateUser = updateUser;
 },{"axios":"../../node_modules/axios/index.js","./alerts":"alerts.js"}],"mapbox.js":[function(require,module,exports) {
 "use strict";
 
@@ -8784,7 +8833,8 @@ var _login = require("./login");
 var _mapbox = require("./mapbox");
 
 var mapBox = document.getElementById('map');
-var loginForm = document.querySelector('.form--login'); // Tombol logout
+var loginForm = document.querySelector('.form--login');
+var updateUserForm = document.querySelector('.form-user-data'); // Tombol logout
 
 var logoutBtn = document.querySelector('.nav__el--logout');
 
@@ -8795,6 +8845,16 @@ if (mapBox) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', _login.logout);
+}
+
+if (updateUserForm) {
+  updateUserForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var username = document.getElementById('name').value;
+    var email = document.getElementById('email').value;
+    console.log(username, email);
+    (0, _login.updateUser)(username, email);
+  });
 }
 
 if (loginForm) {

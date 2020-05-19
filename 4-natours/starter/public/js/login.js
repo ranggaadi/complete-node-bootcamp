@@ -37,3 +37,23 @@ export const logout = async (req, res) => {
         showAlert('error', err.response.data.message);
     }
 }
+
+export const updateUser = async (username, email) => {
+    try{
+        const res = await axios({
+            method: "PATCH",
+            url: "http://localhost:8000/api/v1/users/update-profile",
+            data: {
+                name: username,
+                email
+            }
+        })
+
+        if(res.data.status === 'success'){
+            showAlert('success', 'Updating profile success')
+            location.reload(true);
+        }
+    }catch(err){
+        showAlert('error', err.response.data.message);
+    }
+}
