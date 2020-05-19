@@ -95,7 +95,7 @@ exports.logout = (req, res) => {
     //bersifat httpOnly (aman) karena itu tidak bisa dihapus atau dimodifikasi melalui browser.
     
     res.cookie('jwt', 'logoutkey', {
-        expires: new Date(Date.now() + 10 * 1000), //kadaluarsa dalam 10 detik saja
+        expires: new Date(Date.now() - 10 * 1000), //kadaluarsa dalam 10 detik saja
         httpOnly: true
     })
 
@@ -226,6 +226,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     req.user = currentUser //disimpan disini siapa tau dibutuhkan (akan dioper ke restrictTo middleware), 
     //(dioper / disimpan ke req.user)
+    res.locals.user = currentUser; //disimpan pada res.locals sehingga dapat ditampilkan pada views
 
     //Jika semua kasus terlewati maka Ijinkan masuk ke getAllTour
     next();

@@ -40,3 +40,9 @@ exports.getLogin = (req, res) => {
         title: "Log into your account"
     });
 };
+
+exports.getProfile = (req, res) => {
+    res.status(200).render('pages/profile', {
+        title: "Yout account"
+    })
+}

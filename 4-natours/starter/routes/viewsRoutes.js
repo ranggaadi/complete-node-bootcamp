@@ -4,6 +4,8 @@ const authController = require('./../controllers/authController');
 const router = express.Router();
 
 //mengecek apakah sudah loggin untuk semua route
+router.get('/profile', authController.protect, viewsController.getProfile);
+
 router.use(authController.isLoggedIn);
 
 router.get('/', viewsController.getOverview);
