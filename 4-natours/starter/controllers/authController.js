@@ -21,18 +21,18 @@ const createSendToken = (user, statusCode, res, req) => {
 
     let cookieOption = {
         httpOnly: true,
-        expires: new Date(Date.now()+process.env.JWT_COOKIE_EXPIRE*24*60*60*1000) //diubah menjadi ms
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000) //diubah menjadi ms
     }
 
     //opsi secure hanya diterapkan ketika production, karena hanya akan berjalan pada protocol https
-    if(process.env.NODE_ENV === 'production') cookieOption.secure = true
+    if (process.env.NODE_ENV === 'production') cookieOption.secure = true
 
     res.cookie('jwt', token, cookieOption);
 
 
     //menghilangkan field field sensitive
     user.password = undefined;
-    
+
     res.status(statusCode).json({
         status: "success",
         token,
@@ -157,8 +157,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 })
 
 //middleware ini digunakan untuk mengupdate password dengan memasukan password lama
-exports.updatePassword = catchAsync( async(req, res, next) => {
-    
+exports.updatePassword = catchAsync(async (req, res, next) => {
+
     // 1.) dapatkan user dari collection
     const user = await User.findById(req.user._id).select("+password");
 
@@ -184,7 +184,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     //untuk mendapatkannya dapat didapat di request header dengan ketentuan umum pada attrib Authorization: Bearer {token}
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         token = req.headers.authorization.split(' ')[1]; //melepas "Bearer" dan mengambil tokennya saja
-    }else if(req.cookies.jwt){
+    } else if (req.cookies.jwt) {
         token = req.cookies.jwt;
     }
 
@@ -213,6 +213,35 @@ exports.protect = catchAsync(async (req, res, next) => {
     //(dioper / disimpan ke req.user)
 
     //Jika semua kasus terlewati maka Ijinkan masuk ke getAllTour
+    next();
+});
+
+
+//Middleware untuk mengecek sudah login atau belum
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+
+    //jika terdapat cookie maka ...
+    if (req.cookies.jwt) {
+
+        //mendecode cookies jwt
+        // jwt.verify(token, process.env.JWT_SECRET); karena valuenya dilakukan melalui callback maka dipromisify aja
+        const decodedJWT = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
+
+        // 3.) periksa apakah user masih ada
+        const currentUser = await User.findById(decodedJWT.id).select('+role'); //memilih role agar bisa dioper ke restrictTo
+        if (!currentUser) {
+            return next();
+        }
+
+        // 4.) periksa apakah user merubah passwordnya setelah token diproses / dibuat
+        if (currentUser.changedPasswordAfter(decodedJWT.iat)) {
+            return next();
+        }
+
+        //menyimpan data user pada res.locals untuk dapat dioper pada frontend
+        res.locals.user = currentUser;
+        return next();
+    }
     next();
 });
 
