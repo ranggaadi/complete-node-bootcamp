@@ -182,7 +182,9 @@ tourSchema.pre(/^find/, function(next){
 
 tourSchema.post(/^find/, function(docs, next){
     console.log(`Query dijalankan dalam waktu ${Date.now()-this.start} ms!`); //untuk mencetak waktu eksekusi sejak fungsi pre berjalan
-    console.log("Object returned:", docs.length);
+    if(docs){
+        console.log("Object returned:", docs.length);
+    }
     next();
 })
 
