@@ -90,6 +90,21 @@ exports.login = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res, req);
 })
 
+exports.logout = (req, res) => {
+    //assign ulang jwt dengan jwt yang tidak sesuai sehingga jwt user cookies akan direplace dengan jwt baru, karena 
+    //bersifat httpOnly (aman) karena itu tidak bisa dihapus atau dimodifikasi melalui browser.
+    
+    res.cookie('jwt', 'logoutkey', {
+        expires: new Date(Date.now() + 10 * 1000), //kadaluarsa dalam 10 detik saja
+        httpOnly: true
+    })
+
+    res.status(200).json({
+        status: "success"
+    })
+     
+}
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 1.) get user email based on POSTed email and check if its exist
     const user = await User.findOne({ email: req.body.email })
@@ -218,32 +233,35 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 
 //Middleware untuk mengecek sudah login atau belum
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
 
     //jika terdapat cookie maka ...
     if (req.cookies.jwt) {
+        try {
+            //mendecode cookies jwt
+            // jwt.verify(token, process.env.JWT_SECRET); karena valuenya dilakukan melalui callback maka dipromisify aja
+            const decodedJWT = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
 
-        //mendecode cookies jwt
-        // jwt.verify(token, process.env.JWT_SECRET); karena valuenya dilakukan melalui callback maka dipromisify aja
-        const decodedJWT = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET); //promisify mereturn promise jadi di await
+            // 3.) periksa apakah user masih ada
+            const currentUser = await User.findById(decodedJWT.id).select('+role'); //memilih role agar bisa dioper ke restrictTo
+            if (!currentUser) {
+                return next();
+            }
 
-        // 3.) periksa apakah user masih ada
-        const currentUser = await User.findById(decodedJWT.id).select('+role'); //memilih role agar bisa dioper ke restrictTo
-        if (!currentUser) {
+            // 4.) periksa apakah user merubah passwordnya setelah token diproses / dibuat
+            if (currentUser.changedPasswordAfter(decodedJWT.iat)) {
+                return next();
+            }
+
+            //menyimpan data user pada res.locals untuk dapat dioper pada frontend
+            res.locals.user = currentUser;
+            return next();
+        } catch (err) {
             return next();
         }
-
-        // 4.) periksa apakah user merubah passwordnya setelah token diproses / dibuat
-        if (currentUser.changedPasswordAfter(decodedJWT.iat)) {
-            return next();
-        }
-
-        //menyimpan data user pada res.locals untuk dapat dioper pada frontend
-        res.locals.user = currentUser;
-        return next();
     }
     next();
-});
+};
 
 exports.restrictTo = (...roles) => {
     return (req, res, next) => {

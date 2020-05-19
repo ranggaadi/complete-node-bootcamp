@@ -1,14 +1,21 @@
 import "@babel/polyfill";
-import { login } from './login';
+import { login, logout } from './login';
 import { displayMap } from './mapbox';
 
 
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form');
 
+// Tombol logout
+const logoutBtn = document.querySelector('.nav__el--logout');
+
 if(mapBox){
     const locations = JSON.parse(mapBox.dataset.locations);
     displayMap(locations);
+}
+
+if(logoutBtn){
+    logoutBtn.addEventListener('click', logout);
 }
 
 if (loginForm) {
