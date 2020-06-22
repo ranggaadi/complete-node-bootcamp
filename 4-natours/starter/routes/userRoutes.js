@@ -1,7 +1,11 @@
 const express = require('express');
+const multer = require('multer');
 const usersController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 const router = express.Router();
+
+//untuk multer upload user photo
+const upload = multer({dest: "public/img/users"})
 
 router.post('/signup', authController.signup) 
 router.post('/login', authController.login)
@@ -13,7 +17,7 @@ router.use(authController.protect); //semua router dibawah kode ini di protect (
 
 router.patch('/update-password', authController.updatePassword);
 router.get('/profile', usersController.getMe, usersController.getUser)
-router.patch('/update-profile', usersController.updateMe);
+router.patch('/update-profile', upload.single('photo'), usersController.updateMe);
 router.delete('/delete-account', usersController.deleteMe);
 
 router.use(authController.restrictTo('admin')); //semua router dibawah kode harus protect dan harus punya akses admin.

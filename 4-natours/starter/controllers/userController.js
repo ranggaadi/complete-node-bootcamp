@@ -12,6 +12,9 @@ const filter = (obj, ...allowedFields) => {
 }
 
 exports.updateMe = catchAsync( async(req, res, next) => {
+    console.log(req.file)
+    console.log(req.body)
+
     // 1.) Apabila fields request mengandung password / confirmPassword maka kirim error
     if (req.body.password || req.body.confirmPassword) {
         return next(new CustomError('This route is not for password updates. Please use /update-password instead.', 400));

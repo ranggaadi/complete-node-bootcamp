@@ -77,7 +77,7 @@ app.use(express.static(path.join(__dirname, 'public'))); //menjadikan folder pub
 //simple middleware untuk mencatat waktu request
 app.use((req, res, next) => {
     req.reqTime = new Date().toISOString();
-    console.log(req.cookies);
+    // console.log(req.cookies);
     next();
 })
 
