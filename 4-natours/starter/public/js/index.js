@@ -23,11 +23,12 @@ if(logoutBtn){
 if(updateUserForm){
     updateUserForm.addEventListener('submit', function(e){
         e.preventDefault();
+        const form = new FormData();
+        form.append("name", document.getElementById('name').value)
+        form.append("email", document.getElementById('email').value)
+        form.append("photo", document.getElementById('photo').files[0])
 
-        const username = document.getElementById('name').value
-        const email = document.getElementById('email').value
-        // console.log(username, email);
-        updateSettings({name: username, email}, 'data');
+        updateSettings(form, 'data');
     })
 }
 
