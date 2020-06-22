@@ -13,7 +13,7 @@ router.use(authController.protect); //semua router dibawah kode ini di protect (
 
 router.patch('/update-password', authController.updatePassword);
 router.get('/profile', usersController.getMe, usersController.getUser)
-router.patch('/update-profile', usersController.uploadPhotoUser, usersController.updateMe);
+router.patch('/update-profile', usersController.uploadPhotoUser, usersController.resizeUserPhoto, usersController.updateMe);
 router.delete('/delete-account', usersController.deleteMe);
 
 router.use(authController.restrictTo('admin')); //semua router dibawah kode harus protect dan harus punya akses admin.
