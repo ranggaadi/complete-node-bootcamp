@@ -41,8 +41,6 @@ const filter = (obj, ...allowedFields) => {
 }
 
 exports.updateMe = catchAsync( async(req, res, next) => {
-    console.log(req.file)
-    console.log(req.body)
 
     // 1.) Apabila fields request mengandung password / confirmPassword maka kirim error
     if (req.body.password || req.body.confirmPassword) {
@@ -51,6 +49,7 @@ exports.updateMe = catchAsync( async(req, res, next) => {
     
     // 2.) filter body agar tidak merubah data sensitive seperti role dkk
     filteredBody = filter(req.body, 'name', 'email');
+    if(req.file) filteredBody.photo = req.file.filename
     
     // 3.) update data user
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {

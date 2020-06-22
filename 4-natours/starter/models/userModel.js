@@ -19,7 +19,10 @@ const userSchema = new mongoose.Schema({
         lowercase: true, //akan merubah semua yang dimasukan menjadi kecil
         validate: [validator.isEmail, "Please provide a valid email"]
     },
-    photo: String,
+    photo: {
+        type: String,
+        default: "default.jpg"
+    },
     role: {
         type: String,
         default: "user",
@@ -85,20 +88,20 @@ userSchema.pre('save', async function (next) {
 })
 
 //middleware presave yang digunakan untuk mengupdate passwordChangedAt setelah reset password
-userSchema.pre('save', function(next){
-    if(!this.isModified('password') || this.isNew) return next();
+userSchema.pre('save', function (next) {
+    if (!this.isModified('password') || this.isNew) return next();
 
     this.passwordChangedAt = Date.now() - 1000; //dikurangi sedetik karena biasanya pengesavean pada db lebih lama daripada jwt digenerate
     //dan apabila terjadi (passChangedAt > jwtIssuedTimestramp) maka user tidak bisa login, sehingga untuk menjamin, waktu
     //dikurangi sedetik 
-    
+
     next();
 });
 
-userSchema.pre(/^find/, function(next){
+userSchema.pre(/^find/, function (next) {
     // ambil yang active saja
-    
-    this.find({active: {$ne: false}});
+
+    this.find({ active: { $ne: false } });
     next();
 })
 
@@ -118,7 +121,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
     return false;
 }
 
-userSchema.methods.generateResetPasswordToken = function(){
+userSchema.methods.generateResetPasswordToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
 
     //karena pada passwordResetToken dan passwordResetExpire hanya mengupdate maka di tempat pemanggilan method ini 
@@ -126,8 +129,8 @@ userSchema.methods.generateResetPasswordToken = function(){
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     this.passwordResetExpire = Date.now() + 1 * 60 * 60 * 1000 //kadaluarsa dalam 1 jam
 
-    console.log({resetToken}, this.passwordResetToken);
-    
+    console.log({ resetToken }, this.passwordResetToken);
+
 
     return resetToken;
 }
