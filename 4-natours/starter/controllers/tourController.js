@@ -1,3 +1,5 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('./../models/tourModel');
 const APIfeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
@@ -12,6 +14,75 @@ const factory = require('./controllerFactory');
 // dataJson.forEach(el => delete el.id); //untuk menghapus property id pada json
 
 
+
+
+//dibawah ini adalah config untuk langsung menyimpan di storage filesystem
+// dikomen karena akan melalukan proses resize gambar, sehingga akan lebih baik
+//apabila disimpan dalam memory terlebih dahulu daripada read dua kali
+
+// const multerStorage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, 'public/img/users');
+//     },
+//     filename: (req, file, cb) => {
+//         const ext = file.mimetype.split("/")[1];
+//         cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//     }
+// })
+
+//dibawah ini adalah config untuk melakukan penyimpanan di memorystorage
+//sehingga dapat langsung diproses pada resize
+const multerStorage = multer.memoryStorage()
+
+//untuk memfilter bahwa harus bertipe image
+const multerFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith("image")) {
+        cb(null, true)
+    } else {
+        cb(new CustomError("Not an valid image!, Please provide a valid image file", 400), false);
+    }
+}
+
+//untuk multer upload user photo
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter,
+})
+
+//didalam method single adalah nama form yang memproses gambar
+exports.uploadTourImages = upload.fields([
+    {name:'imageCover', maxCount:1},
+    {name:'images', maxCount:3},
+])
+
+exports.resizeTourImages = catchAsync(async(req, res, next) => {
+
+    // 1 memproses image cover
+    req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+
+    await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat("jpeg")
+    .jpeg({quality: 90})
+    .toFile(`public/img/tours/${req.body.imageCover}`)
+
+
+    //2. memproses images
+    req.body.images = []
+    await Promise.all(req.files.images.map(async(file, i) => {
+        const filename = `tour-${req.params.id}-${Date.now()}-${i+1}.jpeg`
+
+        await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat("jpeg")
+        .jpeg({quality: 90})
+        .toFile(`public/img/tours/${filename}`)
+
+        req.body.images.push(filename)
+    }))
+
+    next();
+})
 // ### ROUTE HANDLER
 //memisahkan route handler
 exports.alias = (req, res, next) => {

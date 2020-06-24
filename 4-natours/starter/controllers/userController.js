@@ -42,21 +42,21 @@ const upload = multer({
 //didalam method single adalah nama form yang memproses gambar
 exports.uploadPhotoUser = upload.single('photo')
 
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync(async(req, res, next) => {
     if (!req.file) return next() //jika tidak ada field langsung ke middleware selanjutnya
 
     //tidak perlu menggunakan extension karena pada package sharp akan selalu dikonversi menjadi jpeg
     req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
 
     //karena disimpan dalam memory maka mengaksesnya menggunkan .buffer
-    sharp(req.file.buffer)
+    await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat("jpeg") //dikonversi menjadi .jpeg
     .jpeg({quality: 90}) //kualitas diturunkan 90%
     .toFile(`public/img/users/${req.file.filename}`)
 
     next();
-}
+})
 
 const filter = (obj, ...allowedFields) => {
     let newObj = {};
