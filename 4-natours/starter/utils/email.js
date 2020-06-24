@@ -7,13 +7,20 @@ module.exports = class Email {
         this.to = user.email
         this.firstName = user.firstName
         this.url = url
-        this.from = `Jonas Schmedtmann <${process.env.EMAIL_FROM}>`
+        this.from = `Jonas Schmedtmann <${process.env.ELASTICMAIL_USERNAME}>`
     }
 
     newTransporter() {
         if(process.env.NODE_ENV === "production"){
-            //nanti akan menggunakan sendgrid
-            return 1
+            //nanti akan menggunakan elasticmail
+            return nodemailer.createTransport({
+                host: process.env.ELASTICMAIL_HOST,
+                port: process.env.ELASTICMAIL_PORT,
+                auth: {
+                    user: process.env.ELASTICMAIL_USERNAME,
+                    pass: process.env.ELASTICMAIL_PASSWORD
+                }
+            })
         }
 
         return nodemailer.createTransport({
