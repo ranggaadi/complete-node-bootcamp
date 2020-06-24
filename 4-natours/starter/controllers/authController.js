@@ -95,7 +95,7 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.logout = (req, res) => {
     //assign ulang jwt dengan jwt yang tidak sesuai sehingga jwt user cookies akan direplace dengan jwt baru, karena 
     //bersifat httpOnly (aman) karena itu tidak bisa dihapus atau dimodifikasi melalui browser.
-    
+
     res.cookie('jwt', 'logoutkey', {
         expires: new Date(Date.now() - 10 * 1000), //kadaluarsa dalam 10 detik saja
         httpOnly: true
@@ -104,7 +104,7 @@ exports.logout = (req, res) => {
     res.status(200).json({
         status: "success"
     })
-     
+
 }
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
@@ -124,18 +124,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     //maka perlu dilakukan save dengan option tidak memvalidasi ulang karena pada schema ada beberapa variabel yang required
 
     // 3.) Send it to user email
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
-
-    const message = `Forgot your password? then simply submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-
-    // const options = {
-    //     email: user.email,
-    //     message,
-    //     subject: "Your password reset token (valid in 1 hour)"
-    // }
 
     try {
-        // await sendEmail(options);
+        const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
+        await new Email(user, resetURL).sendResetPassword();
 
         res.status(200).json({
             status: "success",
@@ -205,8 +197,8 @@ exports.protect = catchAsync(async (req, res, next) => {
         token = req.cookies.jwt;
     }
 
-    if(!req.originalUrl.startsWith('/api')){
-        if(!token){
+    if (!req.originalUrl.startsWith('/api')) {
+        if (!token) {
             res.redirect('/login');
         }
     }
