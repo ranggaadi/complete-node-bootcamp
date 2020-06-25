@@ -1,12 +1,14 @@
 import "@babel/polyfill";
 import { login, logout, updateSettings } from './login';
 import { displayMap } from './mapbox';
+import { bookTour } from "./stripe";
 
 
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const updateUserForm = document.querySelector('.form-user-data');
 const updatePasswordForm = document.querySelector('.form-user-password');
+const bookBtn = document.querySelector("#book-tour");
 
 // Tombol logout
 const logoutBtn = document.querySelector('.nav__el--logout');
@@ -61,5 +63,13 @@ if (loginForm) {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value
         login(email, password);
+    })
+}
+
+if(bookBtn){
+    bookBtn.addEventListener('click', function(e) {
+        e.target.textContent = "Processing..."
+        const tourId = e.target.dataset.tourId
+        bookTour(tourId)
     })
 }
