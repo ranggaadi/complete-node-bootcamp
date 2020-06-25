@@ -1,6 +1,8 @@
 const catchAsync = require('./../utils/catchAsync');
 const Tour = require('./../models/tourModel');
 const Booking = require('./../models/bookingModel');
+const factory = require('./controllerFactory');
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 exports.getCheckoutSession = catchAsync(async(req, res, next) => {
@@ -52,3 +54,9 @@ exports.createBookingCheckout = catchAsync(async(req, res, next) => {
     //akan langsung di redirect ke halaman utama agar tidak terlihat query stringnya
     res.redirect(req.originalUrl.split('?')[0]);
 });
+
+exports.getAllBookings = factory.getAll(Booking)
+exports.getBooking = factory.getOne(Booking), 
+exports.createBooking = factory.createOne(Booking)
+exports.updateBooking = factory.updateOne(Booking)
+exports.deleteBooking = factory.deleteOne(Booking)
