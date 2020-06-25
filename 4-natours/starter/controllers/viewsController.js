@@ -1,5 +1,6 @@
 const Tour = require('./../models/tourModel');
 const User = require('./../models/userModel');
+const Booking = require('./../models/bookingModel');
 const catchAsync = require('./../utils/catchAsync');
 const CustomError = require('./../utils/customError');
 
@@ -62,4 +63,16 @@ exports.updateProfile = catchAsync(async(req, res) => {
         title: "Your Account",
         user: updatedUser
     })
+});
+
+exports.getMyTours = catchAsync(async(req, res, next) => {
+    const bookings = await Booking.find({user: req.user.id}) //mendapatkan id dari current logged in user
+
+    const tourIds = bookings.map(el => el.tour); //memnagmbil id dari setiap item bookings
+    const tours = await Tour.find({_id: {$in: tourIds}})
+
+    res.status(200).render('pages/overview', {
+        title: "My booked tour",
+        tours
+    });
 });
